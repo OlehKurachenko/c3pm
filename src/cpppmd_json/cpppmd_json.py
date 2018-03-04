@@ -27,17 +27,11 @@ class CPPPMDJSON:
     def __str__(self):
         return json.dumps(self.__ordered_dict, indent=4)
 
+    @property
+    def project_name(self):
+        return self.__ordered_dict["name"]
+
     def init_new_json(self):
-        # self.__ordered_dict.setdefault("name", input("Project name>"))
-        # self.__ordered_dict.setdefault("author", input("Author>"))
-        # self.__ordered_dict.setdefault("version", "0.0.1")
-        # self.__ordered_dict.setdefault("description", "Project dependencies for " +
-        #                                self.__ordered_dict.get("name"))
-        # self.__ordered_dict.setdefault("url", input("Project URL>"))
-        # self.__ordered_dict.setdefault("email", input("Project e-mail>"))
-        # proj_license = input("License (empty line if not exist)>")
-        # if proj_license:
-        #     self.__ordered_dict.setdefault("license", proj_license)
         self.__ordered_dict["name"] = input("Project name>")
         self.__ordered_dict["author"] = input("Author>")
         self.__ordered_dict["version"] = "0.0.1"
@@ -48,3 +42,4 @@ class CPPPMDJSON:
         proj_license = input("License (empty line if not exist)>")
         if proj_license:
             self.__ordered_dict["license"] = proj_license
+        self.__ordered_dict["dependencies"] = OrderedDict()
