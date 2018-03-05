@@ -89,12 +89,16 @@ class CLIMain:
         if len(dir_list) != 1:
             CLIMain.__message("wrong number of directories in " + CLIMain.CLONEDIR, CLIMain.RED)
             pass  # TODO handle error cloning
-        dep_name = dir_list[0].decode("ascii")
-        CLIMain.__message("dependency name is " + dep_name, CLIMain.GREEN)
-        os.chdir(dep_name)
+        clone_name = dir_list[0].decode("ascii")
+        CLIMain.__message("cloned directory name is " + clone_name, CLIMain.BLUE)
+        os.chdir(clone_name)
         if not os.path.exists(CLIMain.PROJECT_JSON):
             CLIMain.__message("no " + CLIMain.PROJECT_JSON + "found in repository!", CLIMain.RED)
             pass  # TODO handle not a cpppm project
+        with open(CLIMain.PROJECT_JSON, "r") as clone_project_json_file:
+            clone_project_json = cpppmd_json.CPPPMDJSON(clone_project_json_file.read())
+        dep_name = clone_project_json.project_name
+        CLIMain.__message("dependency project name is " + dep_name, CLIMain.GREEN)
         os.chdir("../..")
         shutil.rmtree(CLIMain.CLONEDIR)
         CLIMain.__message(CLIMain.CLONEDIR + " deleted", CLIMain.BLUE)
@@ -109,7 +113,7 @@ class CLIMain:
             project_json_file.write(str(project_json))
             CLIMain.__message(CLIMain.PROJECT_JSON + " written", CLIMain.GREEN)
         CLIMain.__message("adding dependency " + dep_name + " to project "
-                          + project_json.project_name + "succeeded", CLIMain.GREEN)
+                          + project_json.project_name + " succeeded", CLIMain.GREEN)
 
     @staticmethod
     def __message(message: str, color: str = ""):
