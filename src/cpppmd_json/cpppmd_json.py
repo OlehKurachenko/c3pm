@@ -31,6 +31,21 @@ class CPPPMDJSON:
     def project_name(self):
         return self.__ordered_dict["name"]
 
+    def get_dependency(self, dep_name: str):
+        if dep_name in self.__ordered_dict["dependencies"]:
+            return self.__ordered_dict["dependencies"][dep_name]
+        else:
+            return None
+
+    def add_dependency(self, dep_type: str, dep_name: str, location: str, version: str):
+        assert dep_name not in self.__ordered_dict["dependencies"], "Dependency already exist"
+
+        if dep_type == "git":
+            self.__ordered_dict["dependencies"][dep_name] = OrderedDict()
+            self.__ordered_dict["dependencies"][dep_name]["type"] = "git"
+            self.__ordered_dict["dependencies"][dep_name]["url"] = location
+            self.__ordered_dict["dependencies"][dep_name]["version"] = version
+
     def init_new_json(self):
         self.__ordered_dict["name"] = input("Project name>")
         self.__ordered_dict["author"] = input("Author>")
