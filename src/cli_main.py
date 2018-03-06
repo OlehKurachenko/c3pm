@@ -39,10 +39,11 @@ class CLIMain:
             CLIMain.__init_project()
         if len(sys.argv) == 4 and sys.argv[1] == "add" and sys.argv[2] == "git":
             CLIMain.__add_dependency(sys.argv[2], sys.argv[3])  # TODO handle version
+        if len(sys.argv) == 4 and sys.argv[1] == "remove" and sys.argv[2] == "git":
+            CLIMain.__remove_dependency(sys.argv[3], sys.argv[2]) # TODO handle version
         # TODO hangle list
         # TODO handle tree
         # TODO handle upgrade
-        # TODO handle add
         # TODO handle remove
 
     @staticmethod
@@ -114,6 +115,20 @@ class CLIMain:
             CLIMain.__message(CLIMain.PROJECT_JSON + " written", CLIMain.GREEN)
         CLIMain.__message("adding dependency " + dep_name + " to project "
                           + project_json.project_name + " succeeded", CLIMain.GREEN)
+
+    @staticmethod
+    def __remove_dependency(dep_name: str, dep_type: str = "name"):
+        project_json_file = open(CLIMain.PROJECT_JSON, 'r')
+        # TODO handle non-existing cpppm_project.json
+        project_json = cpppmd_json.CPPPMDJSON(project_json_file.read())
+        project_json_file.close()
+        # TODO handle bad json/bad project json
+        project_json.remove_dependency(dep_name, dep_type)
+        with open(CLIMain.PROJECT_JSON, "w+") as project_json_file:
+            project_json_file.write(str(project_json))
+            CLIMain.__message(CLIMain.PROJECT_JSON + " written", CLIMain.GREEN)
+        CLIMain.__message(dep_name + " removed", CLIMain.GREEN)
+        # TODO handle deleting by name
 
     @staticmethod
     def __message(message: str, color: str = ""):

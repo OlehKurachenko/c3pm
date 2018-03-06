@@ -46,6 +46,13 @@ class CPPPMDJSON:
             self.__ordered_dict["dependencies"][dep_name]["url"] = location
             self.__ordered_dict["dependencies"][dep_name]["version"] = version
 
+    def remove_dependency(self, dep_data: str, dep_data_type: str):
+        if dep_data_type == "git":
+            for key in self.__ordered_dict["dependencies"].keys():
+                if self.__ordered_dict["dependencies"][key]["type"] == "git" \
+                        and self.__ordered_dict["dependencies"][key]["url"] == dep_data:
+                    del self.__ordered_dict["dependencies"][key]
+
     def init_new_json(self):
         self.__ordered_dict["name"] = input("Project name>")
         self.__ordered_dict["author"] = input("Author>")
