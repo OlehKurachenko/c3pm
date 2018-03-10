@@ -16,6 +16,7 @@ import os
 import subprocess
 import shutil
 
+
 class CLIMain:
     # TODO add comments
     # TODO add man
@@ -23,7 +24,7 @@ class CLIMain:
     RED = "\033[1;31m"
     BLUE = "\033[1;34m"
     CYAN = "\033[1;36m"
-    GREEN = "\033[0;32m"
+    GREEN = "\033[1;32m"
     RESET = "\033[0;0m"
     BOLD = "\033[;1m"
     REVERSE = "\033[;7m"
@@ -40,7 +41,9 @@ class CLIMain:
         if len(sys.argv) == 4 and sys.argv[1] == "add" and sys.argv[2] == "git":
             CLIMain.__add_dependency(sys.argv[2], sys.argv[3])  # TODO handle version
         if len(sys.argv) == 4 and sys.argv[1] == "remove" and sys.argv[2] == "git":
-            CLIMain.__remove_dependency(sys.argv[3], sys.argv[2]) # TODO handle version
+            CLIMain.__remove_dependency(sys.argv[3], sys.argv[2])  # TODO handle version
+        if len(sys.argv) == 2 and sys.argv[1] == "list":
+            CLIMain.__list_dependencies()
         # TODO hangle list
         # TODO handle tree
         # TODO handle upgrade
@@ -67,18 +70,13 @@ class CLIMain:
                                        CLIMain.CLONEDIR + "/**")  # TODO close
         CLIMain.__message(".gitignore written", CLIMain.GREEN)
         project_json = cpppmd_json.CPPPMDJSON()
-        open(CLIMain.PROJECT_JSON, 'w+').write(str(project_json)) # TODO close
-        CLIMain.__message(CLIMain.PROJECT_JSON + " written", CLIMain.GREEN)
+        CLIMain.__write_project_json(project_json)
         CLIMain.__message("cpppm project " + project_json.project_name + " successfully initiated",
                           CLIMain.GREEN)
 
     @staticmethod
     def __add_dependency(dep_type: str, location: str, version: str = ""):
-        project_json_file = open(CLIMain.PROJECT_JSON, 'r')
-        # TODO handle non-existing cpppm_project.json
-        project_json = cpppmd_json.CPPPMDJSON(project_json_file.read())
-        project_json_file.close()
-        # TODO handle bad json/bad project json
+        project_json = CLIMain.__load_project_json()
         os.mkdir(CLIMain.CLONEDIR)
         # TODO hangle existance of clonedir
         os.chdir(CLIMain.CLONEDIR)
@@ -110,29 +108,49 @@ class CLIMain:
             project_json.add_dependency("git", dep_name, location, "master")
             CLIMain.__message("dependency " + dep_name + " added to project" +
                               project_json.project_name, CLIMain.GREEN)
-        with open(CLIMain.PROJECT_JSON, "w+") as project_json_file:
-            project_json_file.write(str(project_json))
-            CLIMain.__message(CLIMain.PROJECT_JSON + " written", CLIMain.GREEN)
+        CLIMain.__write_project_json(project_json)
         CLIMain.__message("adding dependency " + dep_name + " to project "
                           + project_json.project_name + " succeeded", CLIMain.GREEN)
 
     @staticmethod
     def __remove_dependency(dep_name: str, dep_type: str = "name"):
-        project_json_file = open(CLIMain.PROJECT_JSON, 'r')
-        # TODO handle non-existing cpppm_project.json
-        project_json = cpppmd_json.CPPPMDJSON(project_json_file.read())
-        project_json_file.close()
-        # TODO handle bad json/bad project json
+        project_json = CLIMain.__load_project_json()
         project_json.remove_dependency(dep_name, dep_type)
-        with open(CLIMain.PROJECT_JSON, "w+") as project_json_file:
-            project_json_file.write(str(project_json))
-            CLIMain.__message(CLIMain.PROJECT_JSON + " written", CLIMain.GREEN)
+        CLIMain.__write_project_json(project_json)
         CLIMain.__message(dep_name + " removed", CLIMain.GREEN)
         # TODO handle deleting by name
 
     @staticmethod
+    def __list_dependencies():
+        project_json = CLIMain.__load_project_json()
+        dependencies = project_json.list_all_dependencies()
+        while len(dependencies):
+            dependency = dependencies.popitem(last=False)
+            sys.stdout.write(CLIMain.CYAN)
+            print(dependency[0] + ":" + dependency[1]["type"] + "->" + dependency[1]["url"] + "->" +
+                  dependency[1]["version"])
+            sys.stdout.write(CLIMain.RESET)
+
+    @staticmethod
+    def __load_project_json() -> cpppmd_json.CPPPMDJSON :
+        project_json_file = open(CLIMain.PROJECT_JSON, 'r')
+        # TODO handle non-existing cpppm_project.json
+        project_json = cpppmd_json.CPPPMDJSON(project_json_file.read())
+        # TODO handle bad json/bad project json
+        project_json_file.close()
+        CLIMain.__message(CLIMain.PROJECT_JSON + " loaded", CLIMain.BLUE)
+        return project_json
+
+    @staticmethod
+    def __write_project_json(project_json: cpppmd_json.CPPPMDJSON):
+        # TODO handle file not opened
+        with open(CLIMain.PROJECT_JSON, "w+") as project_json_file:
+            project_json_file.write(str(project_json))
+            CLIMain.__message(CLIMain.PROJECT_JSON + " written", CLIMain.GREEN)
+
+    @staticmethod
     def __message(message: str, color: str = ""):
-        print(sys.argv[0], end=": ")
+        # print(sys.argv[0], end=": ")
         if color:
             sys.stdout.write(color)
         print(message)

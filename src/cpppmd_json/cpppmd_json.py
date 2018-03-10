@@ -8,12 +8,21 @@
 #   rate&CV http://www.linkedin.com/in/oleh-kurachenko-6b025b111
 #  
 
-import json
-from collections import OrderedDict
+# TODO check & fix unnecessare imports
 
+import json
+import os
+from collections import OrderedDict
+import random
+import shutil
+import sys
 
 class CPPPMDJSON:
     # TODO write comments
+
+    # TODO fix weak incapsultaion here and in cppmd_json
+    CLONEDIR = ".cpppm_clonedir"
+    PROJECT_JSON = "cpppm_project.json"
 
     def __init__(self, json_str: str = ""):
         assert type(json_str) == str, "Illegal type"
@@ -53,6 +62,33 @@ class CPPPMDJSON:
                         and self.__ordered_dict["dependencies"][key]["url"] == dep_data:
                     del self.__ordered_dict["dependencies"][key]
 
+    def list_all_dependencies(self) -> OrderedDict:
+        dependencies = OrderedDict(self.__ordered_dict["dependencies"])
+        targets = OrderedDict(self.__ordered_dict["dependencies"])
+        os.mkdir(CPPPMDJSON.CLONEDIR)  # TODO write
+        os.chdir(CPPPMDJSON.CLONEDIR)
+        while len(targets):
+            dependency = targets.popitem(last=False)
+            # TODO handle not git only
+            clone_name = str(random.randint(1000000000000, 9999999999999))
+            # CPPPMDJSON.__message("DEPENDENCY:" + dependency[0] + " + " + str(dependency[1]), CPPPMDJSON.RED)
+            CPPPMDJSON.__message("cloning " + dependency[1]["url"] + " to " + clone_name,
+                                 CPPPMDJSON.BLUE)
+            os.system("git clone " + dependency[1]["url"] + " " + clone_name)
+            CPPPMDJSON.__message("cloned", CPPPMDJSON.BLUE)
+            os.chdir(clone_name)
+            project_json = CPPPMDJSON.__load_project_json()
+            for sub_dependency in project_json.__ordered_dict["dependencies"]:
+                if sub_dependency not in dependencies:
+                    targets[sub_dependency] = \
+                        OrderedDict(project_json.__ordered_dict["dependencies"][sub_dependency])
+                    dependencies[sub_dependency] = \
+                        OrderedDict(project_json.__ordered_dict["dependencies"][sub_dependency])
+            os.chdir("..")
+        os.chdir("..")
+        shutil.rmtree(CPPPMDJSON.CLONEDIR)
+        return dependencies
+
     def init_new_json(self):
         self.__ordered_dict["name"] = input("Project name>")
         self.__ordered_dict["author"] = input("Author>")
@@ -65,3 +101,32 @@ class CPPPMDJSON:
         if proj_license:
             self.__ordered_dict["license"] = proj_license
         self.__ordered_dict["dependencies"] = OrderedDict()
+
+    # TODO remove code duplication with cli_main
+    @staticmethod
+    def __load_project_json():
+        project_json_file = open(CPPPMDJSON.PROJECT_JSON, 'r')
+        # TODO handle non-existing cpppm_project.json
+        project_json = CPPPMDJSON(project_json_file.read())
+        # TODO handle bad json/bad project json
+        project_json_file.close()
+        CPPPMDJSON.__message(CPPPMDJSON.PROJECT_JSON + " loaded", CPPPMDJSON.BLUE)
+        return project_json
+
+    # TODO remove code duplication with cli_main
+    RED = "\033[1;31m"
+    BLUE = "\033[1;34m"
+    CYAN = "\033[1;36m"
+    GREEN = "\033[1;32m"
+    RESET = "\033[0;0m"
+    BOLD = "\033[;1m"
+    REVERSE = "\033[;7m"
+
+    # TODO remove code duplication with cli_main
+    @staticmethod
+    def __message(message: str, color: str = ""):
+        # print(sys.argv[0], end=": ")
+        if color:
+            sys.stdout.write(color)
+        print(message)
+        sys.stdout.write(CPPPMDJSON.RESET)
