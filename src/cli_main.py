@@ -44,6 +44,8 @@ class CLIMain:
             CLIMain.__remove_dependency(sys.argv[3], sys.argv[2])  # TODO handle version
         if len(sys.argv) == 2 and sys.argv[1] == "list":
             CLIMain.__list_dependencies()
+        if len(sys.argv) == 2 and sys.argv[1] == "upgrade":
+            CLIMain.__upgrade_dependecdies()
         # TODO hangle list
         # TODO handle tree
         # TODO handle upgrade
@@ -130,6 +132,35 @@ class CLIMain:
             print(dependency[0] + ":" + dependency[1]["type"] + "->" + dependency[1]["url"] + "->" +
                   dependency[1]["version"])
             sys.stdout.write(CLIMain.RESET)
+
+    # TODO handle errors
+    @staticmethod
+    def __upgrade_dependecdies():
+        project_json = CLIMain.__load_project_json()
+        dependencies = project_json.list_all_dependencies()
+        shutil.rmtree("import_src")
+        os.mkdir("import_src")
+        os.mkdir(CLIMain.CLONEDIR)
+        os.chdir(CLIMain.CLONEDIR)
+        while len(dependencies):
+            dependency = dependencies.popitem(last=False)
+            sys.stdout.write(CLIMain.BLUE)
+            print("loading: " + dependency[0] + ":" + dependency[1]["type"] + "->"
+                  + dependency[1]["url"] + "->" + dependency[1]["version"])
+            sys.stdout.write(CLIMain.RESET)
+            CLIMain.__message("cloning " + dependency[1]["url"] + " to " + CLIMain.CLONEDIR + " ...",
+                              CLIMain.BLUE)
+            os.system("git clone " + dependency[1]["url"] + " " + dependency[0])
+            CLIMain.__message("cloned!", CLIMain.BLUE)
+            CLIMain.__message("copying " + dependency[0] + "/export_src" + " form "
+                              + CLIMain.CLONEDIR + "/" + dependency[0]
+                              + " to import_src/" + dependency[0])
+            shutil.copytree(dependency[0] + "/export_src", "../import_src/" + dependency[0])
+            CLIMain.__message("copied!", CLIMain.GREEN)
+            shutil.rmtree(dependency[0])
+        os.chdir("..")
+        shutil.rmtree(CLIMain.CLONEDIR)
+        CLIMain.__message("Project upgraded", CLIMain.GREEN)
 
     @staticmethod
     def __load_project_json() -> cpppmd_json.CPPPMDJSON :
