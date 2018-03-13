@@ -30,6 +30,8 @@ class CLIMain:
     REVERSE = "\033[;7m"
 
     CLONEDIR = ".cpppm_clonedir"
+    EXPORTDIR = "src"
+    IMPORTDIR = "import_src"
     PROJECT_JSON = "cpppm_project.json"
 
     @staticmethod
@@ -53,16 +55,25 @@ class CLIMain:
 
     @staticmethod
     def __init_project():
-        if not os.path.isdir("export_src"):
-            if os.path.exists("export_src"):
+        project_json = cpppmd_json.CPPPMDJSON()
+        CLIMain.__write_project_json(project_json)
+        CLIMain.__message("cpppm project " + project_json.project_name + " successfully initiated",
+                          CLIMain.GREEN)
+        if not os.path.isdir(CLIMain.EXPORTDIR):
+            if os.path.exists(CLIMain.EXPORTDIR):
                 pass  # TODO handle already existing file export_src instead of directory
-            os.mkdir("export_src")
-        CLIMain.__message("export_src created", CLIMain.GREEN)
-        if not os.path.isdir("import_src"):
-            if os.path.exists("import_src"):
+            os.mkdir(CLIMain.EXPORTDIR)
+        CLIMain.__message(CLIMain.EXPORTDIR + " created", CLIMain.GREEN)
+        os.chdir(CLIMain.EXPORTDIR)
+        os.mkdir(project_json.project_name)
+        CLIMain.__message(CLIMain.EXPORTDIR + "/" + project_json.project_name +
+                          " created", CLIMain.GREEN)
+        os.chdir("..")
+        if not os.path.isdir(CLIMain.IMPORTDIR):
+            if os.path.exists(CLIMain.IMPORTDIR):
                 pass  # TODO handle already existing file import_src instead of directory
-            os.mkdir("import_src")
-        CLIMain.__message("import_src created", CLIMain.GREEN)
+            os.mkdir(CLIMain.IMPORTDIR)
+        CLIMain.__message(CLIMain.IMPORTDIR + " created", CLIMain.GREEN)
         gitignore_content = ""
         if os.path.exists(".gitignore"):
             if os.path.isdir(".gitignore"):
@@ -71,10 +82,6 @@ class CLIMain:
         open(".gitignore", "w+").write(gitignore_content + "\n" + "import_src/**" + "\n" +
                                        CLIMain.CLONEDIR + "/**")  # TODO close
         CLIMain.__message(".gitignore written", CLIMain.GREEN)
-        project_json = cpppmd_json.CPPPMDJSON()
-        CLIMain.__write_project_json(project_json)
-        CLIMain.__message("cpppm project " + project_json.project_name + " successfully initiated",
-                          CLIMain.GREEN)
 
     @staticmethod
     def __add_dependency(dep_type: str, location: str, version: str = ""):
@@ -138,8 +145,8 @@ class CLIMain:
     def __upgrade_dependecdies():
         project_json = CLIMain.__load_project_json()
         dependencies = project_json.list_all_dependencies()
-        shutil.rmtree("import_src")
-        os.mkdir("import_src")
+        shutil.rmtree(CLIMain.IMPORTDIR)
+        os.mkdir(CLIMain.IMPORTDIR)
         os.mkdir(CLIMain.CLONEDIR)
         os.chdir(CLIMain.CLONEDIR)
         while len(dependencies):
@@ -152,10 +159,11 @@ class CLIMain:
                               CLIMain.BLUE)
             os.system("git clone " + dependency[1]["url"] + " " + dependency[0])
             CLIMain.__message("cloned!", CLIMain.BLUE)
-            CLIMain.__message("copying " + dependency[0] + "/export_src" + " form "
+            CLIMain.__message("copying " + dependency[0] + "/" + CLIMain.EXPORTDIR + "" + " form "
                               + CLIMain.CLONEDIR + "/" + dependency[0]
-                              + " to import_src/" + dependency[0])
-            shutil.copytree(dependency[0] + "/export_src", "../import_src/" + dependency[0])
+                              + " to " + CLIMain.IMPORTDIR + "/" + dependency[0])
+            shutil.copytree(dependency[0] + "/" + CLIMain.EXPORTDIR + "/" + dependency[0], "../"
+                            + CLIMain.IMPORTDIR + "/" + dependency[0])
             CLIMain.__message("copied!", CLIMain.GREEN)
             shutil.rmtree(dependency[0])
         os.chdir("..")
