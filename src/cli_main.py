@@ -31,8 +31,8 @@ class CLIMain:
 
     CLONEDIR = ".cpppm_clonedir"
     EXPORTDIR = "src"
-    IMPORTDIR = "import_src"
-    PROJECT_JSON = "cpppm_project.json"
+    IMPORTDIR = "imports"
+    PROJECT_JSON = "cpppm.json"
 
     @staticmethod
     def main():
