@@ -7,6 +7,8 @@ dependencies especially for C/C++ programming language. The most
 important thing about it is that it do not try to handle your
 compilation and binaries. It will deal primary with your source code.
 
+### [Usage][usagePage]
+
 ### Technical concept
 
 :heavy_exclamation_mark::wrench: At this moment, this technical concept is not
@@ -304,3 +306,5 @@ example, in **src**
      │         └ c.cpp
      └─── c3pm.json
 ```
+
+[usagePage]: docs/Usage.md
