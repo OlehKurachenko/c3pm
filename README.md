@@ -1,4 +1,4 @@
-# cpppm
+# c3pm
 
 ### Idea
 
@@ -81,7 +81,7 @@ this:
 └─── B
      ├─── b.cpp
      ├─── b.h
-     └─── cpppm.json
+     └─── c3pm.json
 ```
 
 ##### Updated:
@@ -94,10 +94,10 @@ this:
      │         └─── a.h
      ├─── b.cpp
      ├─── b.h
-     └─── cpppm.json
+     └─── c3pm.json
 ```
 
-##### cpppm.json
+##### c3pm.json
 ```json
 {
     "name": "B",
@@ -123,7 +123,7 @@ copies. Lets consider an example. We'll have also projects **C**
 & **D**, similar to **A** & **B**. We'll also have the next
 dependencies list:
 
-##### B/cpppm.json
+##### B/c3pm.json
 ```json
 {
     "name": "B",
@@ -133,7 +133,7 @@ dependencies list:
 }
 ``` 
 
-##### C/cpppm.json
+##### C/c3pm.json
 ```json
 {
     "name": "C",
@@ -144,7 +144,7 @@ dependencies list:
 }
 ``` 
 
-##### D/cpppm.json
+##### D/c3pm.json
 ```json
 {
     "name": "D",
@@ -173,7 +173,7 @@ we'll have next file tree:
      │    │    │         └─── a.h
      │    │    ├─── b.cpp
      │    │    ├─── b.h
-     │    │    └─── cpppm.json
+     │    │    └─── c3pm.json
      │    └─── C
      │         ├─── imports
      │         │    ├─── A
@@ -186,13 +186,13 @@ we'll have next file tree:
      │         │         │         └─── a.h
      │         │         ├─── b.cpp
      │         │         ├─── b.h
-     │         │         └─── cpppm.json
+     │         │         └─── c3pm.json
      │         ├─── c.cpp
      │         ├─── c.h
-     │         └─── cpppm.json        
+     │         └─── c3pm.json        
      ├─── d.cpp
      ├─── d.h
-     └─── cpppm.json
+     └─── c3pm.json
 ```
 
 Four copies of **a.cpp** & **a.h**, two copies of **b.cpp** & **b.h**.
@@ -216,7 +216,7 @@ Here is an example:
      │    └─── exports
      │         ├ b.h
      │         └ b.cpp
-     └─── cpppm.json
+     └─── c3pm.json
 ```
 
 ##### Updated:
@@ -231,7 +231,7 @@ Here is an example:
      │    └─── A
      │         ├ a.h
      │         └ a.cpp
-     └─── cpppm.json
+     └─── c3pm.json
 ```
 
 ##### Example form "Approach #2" in our new manner:
@@ -253,7 +253,7 @@ Here is an example:
      │    └─── C
      │         ├ c.h
      │         └ c.cpp
-     └─── cpppm.json
+     └─── c3pm.json
 ```
 
 Now, our path to file in dependency is indential both for any file in
@@ -302,5 +302,5 @@ example, in **src**
      │    └─── C
      │         ├ c.h
      │         └ c.cpp
-     └─── cpppm.json
+     └─── c3pm.json
 ```
