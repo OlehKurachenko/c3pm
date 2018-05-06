@@ -28,6 +28,8 @@ class C3PMJSON:
     version = 'v0.2'
     whatIsC3pm = "https://github.com/OlehKurachenko/c3pm"
 
+    C3PM_JSON_FILENAME = "c3pm.json"
+
     def __init__(self, json_str: str = None):
         """
         json_str is being parsed to get it's representation
@@ -68,3 +70,10 @@ class C3PMJSON:
         :return: json str representation to be written for c3mp.json file
         """
         return json.dumps(self.__c3pm_dict, indent=4)
+
+    def write(self):
+        """
+        Writes/re-writes c3mp.json
+        """
+        with open(C3PMJSON.C3PM_JSON_FILENAME, "w+") as c3pm_json_file:
+            c3pm_json_file.write(self.json_str)

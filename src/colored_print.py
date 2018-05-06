@@ -26,7 +26,7 @@ class ColoredPrint:
     BOLD = "\033[;1m"
 
     @staticmethod
-    def print(output: str, color: str = ""):
+    def print(output: str, color: str = "", line_end: str = "\n", ostream = sys.stdout):
         """
         Prints in color to stdout
         :param output: str to be printed in color
@@ -35,7 +35,8 @@ class ColoredPrint:
         """
 
         if color:
-            sys.stdout.write(color)
-        sys.stdout.write(output)
+            ostream.write(color)
+        ostream.write(output)
         if color:
-            sys.stdout.write(ColoredPrint.__RESET)
+            ostream.write(ColoredPrint.__RESET)
+        ostream.write(line_end)
