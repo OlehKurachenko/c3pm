@@ -41,11 +41,8 @@ class C3PMJSON:
 
             self.__c3pm_dict = json.loads(json_str, object_pairs_hook=OrderedDict)
         else:
-            pass  # TODO write
-
-
-
-        pass  # TODO write
+            self.__c3pm_dict = OrderedDict()
+            self.init_new_json()
 
     def init_new_json(self):
         """
@@ -64,3 +61,10 @@ class C3PMJSON:
         self.__c3pm_dict["dependencies"] = []
         self.__c3pm_dict["c3pm_version"] = self.version
         self.__c3pm_dict["whatIsC3pm"] = self.whatIsC3pm
+
+    @property
+    def json_str(self) -> str:
+        """
+        :return: json str representation to be written for c3mp.json file
+        """
+        return json.dumps(self.__c3pm_dict, indent=4)
