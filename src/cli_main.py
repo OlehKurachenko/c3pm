@@ -25,7 +25,7 @@ class CLIMain:
     """
     Temporary directory in which dependency repositories are cloned
     """
-    CLONE_DIR = ".cpppm_clonedir"
+    CLONE_DIR = ".c3pm_clonedir"
 
     SRC_DIR = "src"
     EXPORT_DIR = "exports"
