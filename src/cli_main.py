@@ -40,9 +40,10 @@ class CLIMain:
         if len(sys.argv) < 2:
             CLIMain.__error_message("At least one CLI argument expected")  # TODO show usage
             sys.exit()
-        if len(sys.argv) == 2 and sys.argv[1] == "init":
-            CLIMain.__init_project()
-            return
+        if sys.argv[1] == "init":
+            if len(sys.argv) == 2:
+                CLIMain.__init_project()
+                return
 
     @staticmethod
     def __init_project():
