@@ -57,6 +57,11 @@ class CLIMain:
                                     + C3PMJSON.C3PM_JSON_FILENAME + " have to be a file")
             sys.exit()
 
+        if os.path.isfile(C3PMJSON.C3PM_JSON_FILENAME):
+            CLIMain.__error_message(C3PMJSON.C3PM_JSON_FILENAME + " already exist. Delete it to re-init"
+                                                                  "the project")
+            sys.exit()
+
         if os.path.isfile(CLIMain.SRC_DIR):
                 CLIMain.__error_message("File " + CLIMain.SRC_DIR + " already exist in project directory. "
                                         + CLIMain.SRC_DIR + " have to be a directory!")
