@@ -81,6 +81,14 @@ class C3PMJSON:
         self.__c3pm_dict["whatIsC3pm"] = self.whatIsC3pm
 
     @property
+    def name(self) -> str:
+        return self.__c3pm_dict["name"]
+
+    @name.setter
+    def name(self, name: str):
+        self.__c3pm_dict["name"] = name
+
+    @property
     def json_str(self) -> str:
         """
         :return: json str representation to be written for c3mp.json file
