@@ -33,7 +33,12 @@ Mandatory field are marked with *
 
 #### name*
 
-A project's name, used as directory name in **imports** (by default)
+A project's name, used as directory name in **imports** (by default).  
+
+It have to be a non-empty string, only containing lowercase letters
+(```a-z```), and the next characters (```-_```). This string have to
+start and end with letters.  
+Length of this string have to be less or equal 100. 
 
 #### author*
 

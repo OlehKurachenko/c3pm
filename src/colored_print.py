@@ -20,6 +20,7 @@ class ColoredPrint:
     BOLD_BLUE = "\033[1;34m"
     BOLD_CYAN = "\033[1;36m"
     BOLD_GREEN = "\033[1;32m"
+    BOLD_YELLOW = "\033[1;33m"
 
     __RESET = "\033[0;0m"
 
@@ -31,6 +32,8 @@ class ColoredPrint:
         Prints in color to stdout
         :param output: str to be printed in color
         :param color: a property of ColoredPrint, which represents
+        :param line_end: str printed in the end of message, not colored
+        :param ostream: output stream to which message will be printed
         a color
         """
 

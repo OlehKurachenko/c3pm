@@ -9,6 +9,7 @@
 #
 
 from collections import OrderedDict
+from colored_print import ColoredPrint as ColorP
 import json
 
 
@@ -24,6 +25,9 @@ class C3PMJSON:
     property "version" is a version of c3pm.json standard
     property "whatIsC3pm" is a url to c3pm project, which is added to all c3pm.json
     files
+
+    Attributes:
+        __c3pm_dict -- an OrderedDict with containment of c3pm.json
     """
 
     version = 'v0.2'
@@ -67,7 +71,16 @@ class C3PMJSON:
         Initialize new C3PMJSON with data from user via CLI.
         !!! Do not handle wrong input TODO fix
         """
-        self.__c3pm_dict["name"] = input("Project name>")
+
+        # Getting name
+        while True:
+            name = input("Project name>")
+            if not C3PMJSON.FieldsChecker.name_is_ok(name):
+                ColorP.print("Bad name: " + C3PMJSON.FieldsChecker.problem_with_name(name))
+            else:
+                self.__c3pm_dict["name"] = name
+                break
+
         self.__c3pm_dict["author"] = input("Author>")
         self.__c3pm_dict["version"] = "0.0.1"
         self.__c3pm_dict["description"] = input("Description>")
@@ -86,6 +99,12 @@ class C3PMJSON:
 
     @name.setter
     def name(self, name: str):
+        """
+        :param name: new name
+        :raises ValueError: if name is not a valid c3pm-project name
+        """
+        if not C3PMJSON.FieldsChecker.name_is_ok(name):
+            raise ValueError(C3PMJSON.FieldsChecker.problem_with_name(name))
         self.__c3pm_dict["name"] = name
 
     @property
@@ -101,3 +120,68 @@ class C3PMJSON:
         """
         with open(C3PMJSON.C3PM_JSON_FILENAME, "w+") as c3pm_json_file:
             c3pm_json_file.write(self.json_str)
+
+    def __check_c3pm_dict(self):
+        """
+        Checks is a self.__s3mp_dict which is parsed from c3pm.json is valid
+        :raises C3PMJSON.BadC3PMJSONError: when self.__s3mp_dict is not valid
+        """
+        # name section
+        if "name" not in self.__c3pm_dict:
+            raise C3PMJSON.BadC3PMJSONError("no name")
+        if not C3PMJSON.FieldsChecker.name_is_ok(self.__c3pm_dict["name"]):
+            raise C3PMJSON.BadC3PMJSONError(C3PMJSON.FieldsChecker.
+                                            problem_with_name(self.__c3pm_dict["name"]))
+
+    class FieldsChecker:
+        """
+        Class-envelop for methods, which check value is a proper value for c3pm.json field
+
+        Checkers return true
+        """
+
+        ALLOWED_CHARACTERS = "abcdefghijklmnopqrstuvwxyz-_"
+
+        @staticmethod
+        def name_is_ok(name: str) -> bool:
+            """
+            Checks name value
+            :param name: value for name field of c3pm.json
+            :return: True if all ok, False otherwise
+            """
+            return not bool(C3PMJSON.FieldsChecker.problem_with_name(name))
+
+        @staticmethod
+        def problem_with_name(name: str) -> str:
+            """
+            Checks name value
+            :param name: value for name field of c3pm.json
+            :return: empty line if all ok, str with problem text otherwise
+            """
+            if type(name) != str:
+                return "name is not a string"
+            if name == "":
+                return "name is empty string"
+            if len(name) > 100:
+                return "length of name is greater than 100"
+            for i, character in enumerate(name, start=1):
+                if character not in C3PMJSON.FieldsChecker.ALLOWED_CHARACTERS:
+                    return "name have bad character '" + character + "' (code " + str(ord(character)) \
+                            + ") at position " + str(i)
+            if name[0] not in C3PMJSON.FieldsChecker.ALLOWED_CHARACTERS[:-2]:
+                return "first character is not a latin letter"
+            if name[len(name) - 1] not in C3PMJSON.FieldsChecker.ALLOWED_CHARACTERS[:-2]:
+                return "last character is not a latin letter"
+            return ""
+
+    class BadC3PMJSONError(Exception):
+        """
+        Raised when c3pm.json containment, on which class is constructed, is a valid json
+        but is not a valid c3pm.json because of bad data
+
+        Attributes:
+            problem -- a reason why json is not a valid c3mp.json
+        """
+
+        def __init__(self, problem: str):
+            self.problem = problem
