@@ -48,6 +48,7 @@ class C3PMJSON:
 
         :raises json.decoder.JSONDecodeError: if json_str is not a valid json
         :raises FileNotFoundError: if self.C3PM_JSON_FILENAME cannot be opened
+        :raises C3PMJSON.BadC3PMJSONError: if json is not a valid s3pm project json
         :raises AssertionError: if call parameters are forbidden
         """
 
@@ -58,10 +59,12 @@ class C3PMJSON:
             assert type(json_str) == str, "json_str type must be str"
 
             self.__c3pm_dict = json.loads(json_str, object_pairs_hook=OrderedDict)
+            self.__check_c3pm_dict()
         else:
             if load_from_file:
                 with open(self.C3PM_JSON_FILENAME, "r") as c3pm_json_file:
                     self.__c3pm_dict = json.loads(c3pm_json_file.read(), object_pairs_hook=OrderedDict)
+                    self.__check_c3pm_dict()
             else:
                 self.__c3pm_dict = OrderedDict()
                 self.init_new_json()
