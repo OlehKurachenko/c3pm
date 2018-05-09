@@ -92,7 +92,7 @@ class C3PMJSON:
         proj_license = input("License (empty line if not exist)>")
         if proj_license:
             self.__c3pm_dict["license"] = proj_license
-        self.__c3pm_dict["dependencies"] = []
+        self.__c3pm_dict["dependencies"] = OrderedDict()
         self.__c3pm_dict["c3pm_version"] = self.version
         self.__c3pm_dict["whatIsC3pm"] = self.whatIsC3pm
 
@@ -143,7 +143,8 @@ class C3PMJSON:
         Checkers return true
         """
 
-        ALLOWED_CHARACTERS = "abcdefghijklmnopqrstuvwxyz-_"
+        ALLOWED_SPECIAL_CHARACTERS = "-_"
+        ALLOWED_CHARACTERS = "abcdefghijklmnopqrstuvwxyz0123456789"
 
         @staticmethod
         def name_is_ok(name: str) -> bool:
@@ -168,12 +169,13 @@ class C3PMJSON:
             if len(name) > 100:
                 return "length of name is greater than 100"
             for i, character in enumerate(name, start=1):
-                if character not in C3PMJSON.FieldsChecker.ALLOWED_CHARACTERS:
+                if character not in (C3PMJSON.FieldsChecker.ALLOWED_CHARACTERS
+                                     + C3PMJSON.FieldsChecker.ALLOWED_SPECIAL_CHARACTERS):
                     return "name have bad character '" + character + "' (code " + str(ord(character)) \
                             + ") at position " + str(i)
-            if name[0] not in C3PMJSON.FieldsChecker.ALLOWED_CHARACTERS[:-2]:
+            if name[0] not in C3PMJSON.FieldsChecker.ALLOWED_CHARACTERS:
                 return "first character is not a latin letter"
-            if name[len(name) - 1] not in C3PMJSON.FieldsChecker.ALLOWED_CHARACTERS[:-2]:
+            if name[len(name) - 1] not in C3PMJSON.FieldsChecker.ALLOWED_CHARACTERS:
                 return "last character is not a latin letter"
             return ""
 
