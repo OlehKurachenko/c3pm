@@ -20,4 +20,4 @@ Existence of **src** or **src/exports** as file and **c3pm.json** as
 directory causes an error.Existence of **c3pm.json** as file causes a
 termination too - file have to be deteled to re-init project  
 
-[c3pm_json]: c3pm_json.md
+[c3pm_json]: c3pm%20json.md
