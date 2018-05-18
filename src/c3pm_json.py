@@ -139,8 +139,6 @@ class C3PMJSON:
     class FieldsChecker:
         """
         Class-envelop for methods, which check value is a proper value for c3pm.json field
-
-        Checkers return true
         """
 
         ALLOWED_SPECIAL_CHARACTERS = "-_"
