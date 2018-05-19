@@ -131,7 +131,7 @@ class CLIMain:
     #
     #     # Handling possible errors performing actions
     #     if not CLIMain.ProjectChecker.clonedir_is_ok():
-    #         CLIMain.error_message(CLIMain.ProjectChecker.problem_with_clonedir())
+    #         CLIMain.error_message(CLIMain.ProjectChecker.problem_with_clone_dir())
     #
     #     try:
     #         c3pm_json = C3PMJSON(load_from_file=True)
@@ -289,18 +289,6 @@ class CLIMain:
         """
 
         @staticmethod
-        def project_is_ok(is_object: bool = False) -> bool:
-            """
-            Checks is project a valid c3pm project according to "docs/c3pm project.md",
-            with an exception of c3pm.json - it is being checked while reading it
-            It is obvious that this method checks project in the directory where it is called
-            :param is_object: False by default. If True, checks can c3pm commands be applied
-            to this project, otherwise - is project a valid c3pm project to be cloned.
-            :return: True if all ok, False otherwise
-            """
-            return not bool(CLIMain.ProjectChecker.problem_with_project(is_object))
-
-        @staticmethod
         def problem_with_project(is_object: bool = False) -> str:
             """
             Checks is project a valid c3pm project according to "docs/c3pm project.md",
@@ -317,23 +305,16 @@ class CLIMain:
                 return '"src/exports" is the file in project directory'
 
             if is_object:
-                if not CLIMain.ProjectChecker.clonedir_is_ok():
-                    return CLIMain.ProjectChecker.problem_with_clonedir()
+                problem_with_clone_dir = CLIMain.ProjectChecker.problem_with_clone_dir()
+                if problem_with_clone_dir:
+                    return problem_with_clone_dir
                 if os.path.isfile("imports"):
                     return '"imports" in the file in project directory'
 
             return ""
 
         @staticmethod
-        def clonedir_is_ok() -> bool:
-            """
-            Checks does clone dir meets requirements
-            ":return: True if clone dir is ok, False otherwise
-            """
-            return not bool(CLIMain.ProjectChecker.problem_with_clonedir())
-
-        @staticmethod
-        def problem_with_clonedir() -> str:
+        def problem_with_clone_dir() -> str:
             """
             Checks does clone dir meets requirements
             ":return: empty str if all ok, string with error message otherwise

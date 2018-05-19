@@ -78,8 +78,9 @@ class C3PMJSON:
         # Getting name
         while True:
             name = input("Project name>")
-            if not C3PMJSON.FieldsChecker.name_is_ok(name):
-                ColorP.print("Bad name: " + C3PMJSON.FieldsChecker.problem_with_name(name))
+            problem_with_name = C3PMJSON.FieldsChecker.problem_with_name(name)
+            if problem_with_name:
+                ColorP.print("Bad name: " + problem_with_name)
             else:
                 self.__c3pm_dict["name"] = name
                 break
@@ -106,8 +107,9 @@ class C3PMJSON:
         :param name: new name
         :raises ValueError: if name is not a valid c3pm-project name
         """
-        if not C3PMJSON.FieldsChecker.name_is_ok(name):
-            raise ValueError(C3PMJSON.FieldsChecker.problem_with_name(name))
+        problem_with_name = C3PMJSON.FieldsChecker.problem_with_name(name)
+        if problem_with_name:
+            raise ValueError(problem_with_name)
         self.__c3pm_dict["name"] = name
 
     @property
@@ -132,9 +134,9 @@ class C3PMJSON:
         # name section
         if "name" not in self.__c3pm_dict:
             raise C3PMJSON.BadC3PMJSONError("no name")
-        if not C3PMJSON.FieldsChecker.name_is_ok(self.__c3pm_dict["name"]):
-            raise C3PMJSON.BadC3PMJSONError(C3PMJSON.FieldsChecker.
-                                            problem_with_name(self.__c3pm_dict["name"]))
+        problem_with_name = C3PMJSON.FieldsChecker.problem_with_name(self.__c3pm_dict["name"])
+        if problem_with_name:
+            raise C3PMJSON.BadC3PMJSONError(problem_with_name)
 
     class FieldsChecker:
         """
@@ -143,15 +145,6 @@ class C3PMJSON:
 
         ALLOWED_SPECIAL_CHARACTERS = "-_"
         ALLOWED_CHARACTERS = "abcdefghijklmnopqrstuvwxyz0123456789"
-
-        @staticmethod
-        def name_is_ok(name: str) -> bool:
-            """
-            Checks name value
-            :param name: value for name field of c3pm.json
-            :return: True if all ok, False otherwise
-            """
-            return not bool(C3PMJSON.FieldsChecker.problem_with_name(name))
 
         @staticmethod
         def problem_with_name(name: str) -> str:
