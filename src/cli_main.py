@@ -43,7 +43,7 @@ class CLIMain:
         Main method
         """
         if len(sys.argv) < 2:
-            CLIMain.error_message("At least one CLI argument expected")  # TODO show usage
+            CLIMain.Messages.error_message("At least one CLI argument expected")  # TODO show usage
             sys.exit()
         if sys.argv[1] == "init":
             if len(sys.argv) == 2:
@@ -64,37 +64,37 @@ class CLIMain:
 
         # Handling possible errors before starting a dialog with user
         if os.path.isdir(C3PMJSON.C3PM_JSON_FILENAME):
-            CLIMain.error_message(C3PMJSON.C3PM_JSON_FILENAME + " is a directory. "
-                                  + C3PMJSON.C3PM_JSON_FILENAME + " have to be a file")
+            CLIMain.Messages.error_message(C3PMJSON.C3PM_JSON_FILENAME + " is a directory. "
+                                           + C3PMJSON.C3PM_JSON_FILENAME + " have to be a file")
             sys.exit()
 
         if os.path.isfile(C3PMJSON.C3PM_JSON_FILENAME):
-            CLIMain.error_message(C3PMJSON.C3PM_JSON_FILENAME + " already exist. Delete it to re-init"
-                                                                  "the project")
+            CLIMain.Messages.error_message(C3PMJSON.C3PM_JSON_FILENAME + " already exist. Delete it to re-init"
+                                                                         "the project")
             sys.exit()
 
         if os.path.isfile(CLIMain.SRC_DIR):
-            CLIMain.error_message("File " + CLIMain.SRC_DIR + " already exist in project directory. "
-                                  + CLIMain.SRC_DIR + " have to be a directory!")
+            CLIMain.Messages.error_message("File " + CLIMain.SRC_DIR + " already exist in project directory. "
+                                           + CLIMain.SRC_DIR + " have to be a directory!")
             sys.exit()
 
         if os.path.isfile(CLIMain.SRC_DIR + "/" + CLIMain.EXPORT_DIR):
-            CLIMain.error_message("File " + CLIMain.SRC_DIR + "/" + CLIMain.EXPORT_DIR +
-                                    " already exist in project directory. " +
-                                  CLIMain.SRC_DIR + "/" + CLIMain.EXPORT_DIR + " have to be a directory!")
+            CLIMain.Messages.error_message("File " + CLIMain.SRC_DIR + "/" + CLIMain.EXPORT_DIR +
+                                           " already exist in project directory. " +
+                                           CLIMain.SRC_DIR + "/" + CLIMain.EXPORT_DIR + " have to be a directory!")
             sys.exit()
 
         c3pmjson = C3PMJSON()
 
         if not os.path.isdir(CLIMain.SRC_DIR):
             os.mkdir(CLIMain.SRC_DIR)
-            CLIMain.success_message(CLIMain.SRC_DIR + "directory created")
+            CLIMain.Messages.success_message(CLIMain.SRC_DIR + "directory created")
 
         os.chdir(CLIMain.SRC_DIR)
 
         if not os.path.isdir(CLIMain.EXPORT_DIR):
             os.mkdir(CLIMain.EXPORT_DIR)
-            CLIMain.success_message(CLIMain.SRC_DIR + "/" + CLIMain.EXPORT_DIR + " directory created")
+            CLIMain.Messages.success_message(CLIMain.SRC_DIR + "/" + CLIMain.EXPORT_DIR + " directory created")
 
         os.chdir("..")
 
@@ -102,7 +102,7 @@ class CLIMain:
             gitignore_content = ""
             if os.path.exists(".gitignore"):
                 if os.path.isdir(".gitignore"):
-                    CLIMain.error_message(".gitignore is directory!!!")
+                    CLIMain.Messages.error_message(".gitignore is directory!!!")
                 else:
                     with open(".gitignore", "r") as gitignore_file:
                         gitignore_content = gitignore_file.read()
@@ -116,10 +116,10 @@ class CLIMain:
             if not os.path.isdir(".gitignore"):
                 with open(".gitignore", "w+") as gitignore_file:
                     gitignore_file.write(gitignore_content)
-                CLIMain.success_message(".gitinore written")
+                CLIMain.Messages.success_message(".gitinore written")
 
         c3pmjson.write()
-        CLIMain.success_message(C3PMJSON.C3PM_JSON_FILENAME + " successfully written")
+        CLIMain.Messages.success_message(C3PMJSON.C3PM_JSON_FILENAME + " successfully written")
 
     # @staticmethod
     # def __add_git_c3pm_dependency(git_url: str, version: str = ""):
@@ -251,32 +251,37 @@ class CLIMain:
 
     # Console message methods section
 
-    @staticmethod
-    def success_message(message: str):
+    class Messages:
         """
-        Writes a success message to stdout (in green)
-        :param message: message to be printed
+        Class-envelope for CLI messages methods
         """
-        print(sys.argv[0], end=": ")
-        ColorP.print(message, ColorP.BOLD_GREEN)
 
-    @staticmethod
-    def error_message(message: str):
-        """
-        Writes a success message to stderr (in red)
-        :param message: message to be printed
-        """
-        sys.stderr.write(sys.argv[0] + ": ")
-        ColorP.print(output=message, color=ColorP.BOLD_RED, ostream=sys.stderr)
+        @staticmethod
+        def success_message(message: str):
+            """
+            Writes a success message to stdout (in green)
+            :param message: message to be printed
+            """
+            print(sys.argv[0], end=": ")
+            ColorP.print(message, ColorP.BOLD_GREEN)
 
-    @staticmethod
-    def info_message(message: str):
-        """
-        Writes an info message to stdout (in blue)
-        :param message: message to be printed
-        """
-        print(sys.argv[0], end=": ")
-        ColorP.print(message, ColorP.BOLD_BLUE)
+        @staticmethod
+        def error_message(message: str):
+            """
+            Writes a success message to stderr (in red)
+            :param message: message to be printed
+            """
+            sys.stderr.write(sys.argv[0] + ": ")
+            ColorP.print(output=message, color=ColorP.BOLD_RED, ostream=sys.stderr)
+
+        @staticmethod
+        def info_message(message: str):
+            """
+            Writes an info message to stdout (in blue)
+            :param message: message to be printed
+            """
+            print(sys.argv[0], end=": ")
+            ColorP.print(message, ColorP.BOLD_BLUE)
 
     class ProjectChecker:
         """
