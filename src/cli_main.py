@@ -129,7 +129,7 @@ class CLIMain:
     #     :param version: branch, tag of commit  # TODO handle it (now unused, master if used)
     #     """
     #
-    #     # Handling possible errors performing actions
+    #     # Handling possible errors performing actions TODO replace with new method
     #     if not CLIMain.ProjectChecker.clonedir_is_ok():
     #         CLIMain.error_message(CLIMain.ProjectChecker.problem_with_clone_dir())
     #
@@ -221,6 +221,8 @@ class CLIMain:
     # @staticmethod
     # def __list_dependencies() -> OrderedDict:
     #
+    #     c3pm_json = CLIMain.__load_c3pm_json_with_project_check(is_object=True)
+    #
     #     # todo refactor
     #     dependencies = OrderedDict(self.__ordered_dict["dependencies"])
     #     targets = OrderedDict(self.__ordered_dict["dependencies"])
@@ -249,7 +251,32 @@ class CLIMain:
     #     # todo refactor
     #     pass  # TODO finish
 
-    # Console message methods section
+    @staticmethod
+    def __load_c3pm_json_with_project_check(is_object: bool = False) -> C3PMJSON:
+        """
+        Loads C3PMJSON, checks is project a valid c3pm project.
+        If error occures, error message is being printed and programm execution stops
+        :param is_object: False by default. If True, checks can c3pm commands be applied
+        to this project, otherwise - is project a valid c3pm project to be cloned.
+        :return: C3PMJSON loaded from file c3pm.json in directory called
+        """
+        problem_with_project = CLIMain.ProjectChecker.problem_with_project(is_object)
+        if problem_with_project:
+            CLIMain.Messages.error_message("Bad project:" + problem_with_project)
+            sys.exit()
+        try:
+            c3pm_json = C3PMJSON(load_from_file=True)
+            return c3pm_json
+        except json.decoder.JSONDecodeError:
+            CLIMain.Messages.error_message("bad " + C3PMJSON.C3PM_JSON_FILENAME + " file")
+            sys.exit()
+        except FileNotFoundError:
+            CLIMain.Messages.error_message("no " + C3PMJSON.C3PM_JSON_FILENAME + " file in directory")
+            sys.exit()
+        except C3PMJSON.BadC3PMJSONError as err:
+            CLIMain.Messages.error_message("bad " + C3PMJSON.C3PM_JSON_FILENAME + " in project:" +
+                                    err.problem)
+            sys.exit()
 
     class Messages:
         """
