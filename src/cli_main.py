@@ -12,7 +12,7 @@
 
 import sys
 
-from c3pm_json import C3PMProject
+from c3pm_project import C3PMProject
 from cli_message import CLIMessage
 
 
