@@ -7,6 +7,7 @@
 #   GitHub      https://github.com/OlehKurachenko
 #   rate & CV   http://www.linkedin.com/in/oleh-kurachenko-6b025b111
 #
+
 import os
 from collections import OrderedDict
 from colored_print import ColoredPrint as ColorP
@@ -116,41 +117,16 @@ class C3PMProject:
                     CLIMessage.success_message(".gitinore written")
 
         else:
-            # TODO check project
+            problem_with_project = C3PMProject.ProjectChecker.problem_with_project()
+            if problem_with_project:
+                raise self.BadC3PMProject(problem_with_project)
             with open(self.C3PM_JSON_FILENAME, "r") as c3pm_json_file:
                 self.__c3pm_dict = json.loads(c3pm_json_file.read(), object_pairs_hook=OrderedDict)
-                self.__check_c3pm_dict()
-
-        # TODO check
-        """
-        If json_str is not None (default), it is being parsed to get it's representation. In this
-        case, load_from_file have to be False (default), otherwise it causes an assertion error.
-        If json_str is None and load_from_file if False, it is being constructed with users data
-        via CLI.
-        If json_str in None and load_from_file if True, containment is being red from file
-        self.C3PM_JSON_FILENAME.
-        :param json_str: str - containment of c3pm.json
-        :param load_from_file: if True, json is being red directly from file
-
-        :raises json.decoder.JSONDecodeError: if json_str is not a valid json
-        :raises FileNotFoundError: if self.C3PM_JSON_FILENAME cannot be opened
-        :raises C3PMJSON.BadC3PMJSONError: if json is not a valid s3pm project json
-        :raises AssertionError: if call parameters are forbidden
-        """
-
-        # # todo refactor
-        # assert not (json_str and load_from_file), "if json_str is not None (default)," \
-        #                                           "load_from_file have to be False (default)"
-        #
-        #
-        #     if load_from_file:
-        #         with open(self.C3PM_JSON_FILENAME, "r") as c3pm_json_file:
-        #             self.__c3pm_dict = json.loads(c3pm_json_file.read(), object_pairs_hook=OrderedDict)
-        #             self.__check_c3pm_dict()
-        #     else:
-        #         self.__c3pm_dict = OrderedDict()
-        #         self.init_new_json()
-        # # todo refactor
+                problem_with_c3pm_json = \
+                    C3PMProject.C3PMJSONChecker.problem_with_c3pm_json(self.__c3pm_dict)
+                if problem_with_c3pm_json:
+                    raise self.BadC3PMProject("bad " + self.C3PM_JSON_FILENAME + ": "
+                                              + problem_with_c3pm_json)
 
     def init_new_json(self):
         """
@@ -158,12 +134,10 @@ class C3PMProject:
         !!! Do not handle wrong input TODO fix
         """
 
-        # TODO check
-
         # Getting name
         while True:
             name = input("Project name>")
-            problem_with_name = C3PMProject.FieldsChecker.problem_with_name(name)
+            problem_with_name = C3PMProject.C3PMJSONChecker.problem_with_name(name)
             if problem_with_name:
                 ColorP.print("Bad name: " + problem_with_name)
             else:
@@ -180,62 +154,54 @@ class C3PMProject:
             self.__c3pm_dict["license"] = proj_license
         self.__c3pm_dict["dependencies"] = OrderedDict()
         self.__c3pm_dict["c3pm_version"] = self.C3PM_JSON_VERSION
-        self.__c3pm_dict["whatIsC3pm"] = self.whatIsC3pm
+        self.__c3pm_dict["whatIsC3pm"] = self.WHAT_IS_C3PM_LINK
 
-    # TODO check
     @property
     def name(self) -> str:
         return self.__c3pm_dict["name"]
 
-    # TODO check
     @name.setter
     def name(self, name: str):
         """
         :param name: new name
         :raises ValueError: if name is not a valid c3pm-project name
+        TODO rewrite using list
         """
-        problem_with_name = C3PMProject.FieldsChecker.problem_with_name(name)
+        problem_with_name = C3PMProject.C3PMJSONChecker.problem_with_name(name)
         if problem_with_name:
             raise ValueError(problem_with_name)
         self.__c3pm_dict["name"] = name
 
-    # TODO check
-    @property
-    def json_str(self) -> str:
-        """
-        :return: json str representation to be written for c3mp.json file
-        """
-        return json.dumps(self.__c3pm_dict, indent=4)
-
-    # TODO check
     def write(self):
         """
         Writes/re-writes c3mp.json
         """
         with open(C3PMProject.C3PM_JSON_FILENAME, "w+") as c3pm_json_file:
-            c3pm_json_file.write(self.json_str)
+            c3pm_json_file.write(json.dumps(self.__c3pm_dict, indent=4))
 
-    # TODO check
-    def __check_c3pm_dict(self):
+    class C3PMJSONChecker:
         """
-        Checks is a self.__s3mp_dict which is parsed from c3pm.json is valid
-        :raises C3PMJSON.BadC3PMJSONError: when self.__s3mp_dict is not valid
-        """
-        # name section
-        if "name" not in self.__c3pm_dict:
-            raise C3PMProject.BadC3PMJSONError("no name")
-        problem_with_name = C3PMProject.FieldsChecker.problem_with_name(self.__c3pm_dict["name"])
-        if problem_with_name:
-            raise C3PMProject.BadC3PMJSONError(problem_with_name)
-
-    # TODO check
-    class FieldsChecker:
-        """
-        Class-envelop for methods, which check value is a proper value for c3pm.json field
+        Class-envelop for methods, which checks c3pm.json containment
         """
 
         ALLOWED_SPECIAL_CHARACTERS = "-_"
         ALLOWED_CHARACTERS = "abcdefghijklmnopqrstuvwxyz0123456789"
+
+        @staticmethod
+        def problem_with_c3pm_json(json_representation: OrderedDict) -> str:
+            """
+            Checks is a self.__s3mp_dict which is parsed from c3pm.json is valid
+            :return: empty line if all ok, str with problem text otherwise
+            """
+            # name section
+            if "name" not in json_representation:
+                return "no name"
+            problem_with_name = \
+                C3PMProject.C3PMJSONChecker.problem_with_name(json_representation["name"])
+            if problem_with_name:
+                return "bad name:" + problem_with_name
+
+            return ""
 
         @staticmethod
         def problem_with_name(name: str) -> str:
@@ -251,28 +217,62 @@ class C3PMProject:
             if len(name) > 100:
                 return "length of name is greater than 100"
             for i, character in enumerate(name, start=1):
-                if character not in (C3PMProject.FieldsChecker.ALLOWED_CHARACTERS
-                                     + C3PMProject.FieldsChecker.ALLOWED_SPECIAL_CHARACTERS):
-                    return "name have bad character '" + character + "' (code " + str(ord(character)) \
-                            + ") at position " + str(i)
-            if name[0] not in C3PMProject.FieldsChecker.ALLOWED_CHARACTERS:
+                if character not in (C3PMProject.C3PMJSONChecker.ALLOWED_CHARACTERS
+                                     + C3PMProject.C3PMJSONChecker.ALLOWED_SPECIAL_CHARACTERS):
+                    return "name have bad character '" + character + "' (code "\
+                           + str(ord(character)) + ") at position " + str(i)
+            if name[0] not in C3PMProject.C3PMJSONChecker.ALLOWED_CHARACTERS:
                 return "first character is not a latin letter"
-            if name[len(name) - 1] not in C3PMProject.FieldsChecker.ALLOWED_CHARACTERS:
+            if name[len(name) - 1] not in C3PMProject.C3PMJSONChecker.ALLOWED_CHARACTERS:
                 return "last character is not a latin letter"
             return ""
 
-    # TODO check
-    class BadC3PMJSONError(Exception):
+    class ProjectChecker:
         """
-        Raised when c3pm.json containment, on which class is constructed, is a valid json
-        but is not a valid c3pm.json because of bad data
-
-        Attributes:
-            problem -- a reason why json is not a valid c3mp.json
+        Class-envelope for methods which check is project a valid c3pm-project
         """
 
-        def __init__(self, problem: str):
-            self.problem = problem
+        @staticmethod
+        def problem_with_project(is_object: bool = False) -> str:
+            """
+            Checks is project a valid c3pm project according to "docs/c3pm project.md",
+            with an exception of c3pm.json - it is being checked while reading it
+            It is obvious that this method checks project in the directory where it is called
+            :param is_object: False by default. If True, checks can c3pm commands be applied
+            to this project, otherwise - is project a valid c3pm project to be cloned.
+            :return: empty str if all ok, string with error message otherwise
+            """
+
+            if os.path.isfile("src"):
+                return '"src" is the file in project directory'
+            if os.path.isfile("src/exports"):
+                return '"src/exports" is the file in project directory'
+
+            if is_object:
+                problem_with_clone_dir = C3PMProject.ProjectChecker.problem_with_clone_dir()
+                if problem_with_clone_dir:
+                    return problem_with_clone_dir
+                if os.path.isfile("imports"):
+                    return '"imports" in the file in project directory'
+
+            return ""
+
+        @staticmethod
+        def problem_with_clone_dir() -> str:
+            """
+            Checks does clone dir meets requirements
+            ":return: empty str if all ok, string with error message otherwise
+            """
+            if os.path.isfile(".c3pm_clonedir"):
+                return '".c3pm_clonedir" is the file in project directory'
+            if os.path.isdir(".c3pm_clonedir"):
+                return '".c3pm_clonedir" is the directory in project directory'
+            # noinspection PyBroadException
+            try:
+                os.mkdir(".c3pm_clonedir")
+                os.rmdir(".c3pm_clonedir")
+            except:
+                return '".c3pm_clonedir" cannot be created for undefined reason'
 
     class BadC3PMProject(Exception):
         """

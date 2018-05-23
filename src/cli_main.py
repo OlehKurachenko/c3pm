@@ -10,15 +10,8 @@
 #   rate & CV   http://www.linkedin.com/in/oleh-kurachenko-6b025b111
 #
 
-import json
-import shutil
 import sys
-import os
-import subprocess
 
-from collections import OrderedDict
-
-from colored_print import ColoredPrint as ColorP
 from c3pm_json import C3PMProject
 from cli_message import CLIMessage
 
@@ -43,8 +36,7 @@ class CLIMain:
             sys.exit()
         if sys.argv[1] == "init":
             if len(sys.argv) == 2:
-                pass  # TODO call
-                # CLIMain.__init_project()
+                CLIMain.__init_project()
                 return
         if sys.argv[1] == "add":
             if sys.argv[2] == "git-c3pm":
@@ -201,53 +193,6 @@ class CLIMain:
     #     shutil.rmtree(CPPPMDJSON.CLONEDIR)
     #     # todo refactor
     #     pass  # TODO finish
-
-    class ProjectChecker:
-        """
-        Class-envelope for methods which check is project a valid c3pm-project
-        """
-
-        @staticmethod
-        def problem_with_project(is_object: bool = False) -> str:
-            """
-            Checks is project a valid c3pm project according to "docs/c3pm project.md",
-            with an exception of c3pm.json - it is being checked while reading it
-            It is obvious that this method checks project in the directory where it is called
-            :param is_object: False by default. If True, checks can c3pm commands be applied
-            to this project, otherwise - is project a valid c3pm project to be cloned.
-            :return: empty str if all ok, string with error message otherwise
-            """
-
-            if os.path.isfile("src"):
-                return '"src" is the file in project directory'
-            if os.path.isfile("src/exports"):
-                return '"src/exports" is the file in project directory'
-
-            if is_object:
-                problem_with_clone_dir = CLIMain.ProjectChecker.problem_with_clone_dir()
-                if problem_with_clone_dir:
-                    return problem_with_clone_dir
-                if os.path.isfile("imports"):
-                    return '"imports" in the file in project directory'
-
-            return ""
-
-        @staticmethod
-        def problem_with_clone_dir() -> str:
-            """
-            Checks does clone dir meets requirements
-            ":return: empty str if all ok, string with error message otherwise
-            """
-            if os.path.isfile(".c3pm_clonedir"):
-                return '".c3pm_clonedir" is the file in project directory'
-            if os.path.isdir(".c3pm_clonedir"):
-                return '".c3pm_clonedir" is the directory in project directory'
-            # noinspection PyBroadException
-            try:
-                os.mkdir(".c3pm_clonedir")
-                os.rmdir(".c3pm_clonedir")
-            except:
-                return '".c3pm_clonedir" cannot be created for undefined reason'
 
 
 if __name__ == "__main__":
