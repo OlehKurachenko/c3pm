@@ -19,23 +19,19 @@ import subprocess
 from collections import OrderedDict
 
 from colored_print import ColoredPrint as ColorP
-from c3pm_json import C3PMJSON
+from c3pm_json import C3PMProject
+from cli_message import CLIMessage
 
 
 class CLIMain:
     """
     Main class, which encapsulates main functionality
-    """
+
+    Properties: ISSUES_LINK -- link to GitHub project issues
 
     """
-    Temporary directory in which dependency repositories are cloned
-    """
-    CLONE_DIR = ".c3pm_clonedir"
 
-    SRC_DIR = "src"
-    EXPORT_DIR = "exports"
-
-    IMPORT_DIR = "imports"
+    ISSUES_LINK = "https://github.com/OlehKurachenko/c3pm/issues"
 
     @staticmethod
     def main():
@@ -43,11 +39,12 @@ class CLIMain:
         Main method
         """
         if len(sys.argv) < 2:
-            CLIMain.Messages.error_message("At least one CLI argument expected")  # TODO show usage
+            CLIMessage.error_message("At least one CLI argument expected")  # TODO show usage
             sys.exit()
         if sys.argv[1] == "init":
             if len(sys.argv) == 2:
-                CLIMain.__init_project()
+                pass  # TODO call
+                # CLIMain.__init_project()
                 return
         if sys.argv[1] == "add":
             if sys.argv[2] == "git-c3pm":
@@ -62,64 +59,18 @@ class CLIMain:
         (if not exist) "src" and "src/exports". Adds IMPORT_DIR and CLONE_DIR to .gitignore
         """
 
-        # Handling possible errors before starting a dialog with user
-        if os.path.isdir(C3PMJSON.C3PM_JSON_FILENAME):
-            CLIMain.Messages.error_message(C3PMJSON.C3PM_JSON_FILENAME + " is a directory. "
-                                           + C3PMJSON.C3PM_JSON_FILENAME + " have to be a file")
+        try:
+            c3pmjson = C3PMProject(is_object=True, init_new_project=True)
+        except C3PMProject.BadC3PMProject as err:
+            CLIMessage.error_message("bad project directory: " + err.problem)
             sys.exit()
-
-        if os.path.isfile(C3PMJSON.C3PM_JSON_FILENAME):
-            CLIMain.Messages.error_message(C3PMJSON.C3PM_JSON_FILENAME + " already exist. Delete it to re-init"
-                                                                         "the project")
-            sys.exit()
-
-        if os.path.isfile(CLIMain.SRC_DIR):
-            CLIMain.Messages.error_message("File " + CLIMain.SRC_DIR + " already exist in project directory. "
-                                           + CLIMain.SRC_DIR + " have to be a directory!")
-            sys.exit()
-
-        if os.path.isfile(CLIMain.SRC_DIR + "/" + CLIMain.EXPORT_DIR):
-            CLIMain.Messages.error_message("File " + CLIMain.SRC_DIR + "/" + CLIMain.EXPORT_DIR +
-                                           " already exist in project directory. " +
-                                           CLIMain.SRC_DIR + "/" + CLIMain.EXPORT_DIR + " have to be a directory!")
-            sys.exit()
-
-        c3pmjson = C3PMJSON()
-
-        if not os.path.isdir(CLIMain.SRC_DIR):
-            os.mkdir(CLIMain.SRC_DIR)
-            CLIMain.Messages.success_message(CLIMain.SRC_DIR + "directory created")
-
-        os.chdir(CLIMain.SRC_DIR)
-
-        if not os.path.isdir(CLIMain.EXPORT_DIR):
-            os.mkdir(CLIMain.EXPORT_DIR)
-            CLIMain.Messages.success_message(CLIMain.SRC_DIR + "/" + CLIMain.EXPORT_DIR + " directory created")
-
-        os.chdir("..")
-
-        if os.path.isdir(".git"):
-            gitignore_content = ""
-            if os.path.exists(".gitignore"):
-                if os.path.isdir(".gitignore"):
-                    CLIMain.Messages.error_message(".gitignore is directory!!!")
-                else:
-                    with open(".gitignore", "r") as gitignore_file:
-                        gitignore_content = gitignore_file.read()
-            if gitignore_content and gitignore_content[len(gitignore_content) - 1] != '\n':
-                gitignore_content += "\n"
-            if CLIMain.IMPORT_DIR + "/**" not in gitignore_content.split():
-                gitignore_content += CLIMain.IMPORT_DIR + "/**" + "\n"
-            if CLIMain.CLONE_DIR + "/**" not in gitignore_content.split():
-                gitignore_content += CLIMain.CLONE_DIR + "/**" + "\n"
-
-            if not os.path.isdir(".gitignore"):
-                with open(".gitignore", "w+") as gitignore_file:
-                    gitignore_file.write(gitignore_content)
-                CLIMain.Messages.success_message(".gitinore written")
+        except Exception:
+            CLIMessage.error_message("unknown error happen, please, report the following on " +
+                                     CLIMain.ISSUES_LINK)
+            raise
 
         c3pmjson.write()
-        CLIMain.Messages.success_message(C3PMJSON.C3PM_JSON_FILENAME + " successfully written")
+        CLIMessage.success_message(C3PMProject.C3PM_JSON_FILENAME + " successfully written")
 
     # @staticmethod
     # def __add_git_c3pm_dependency(git_url: str, version: str = ""):
@@ -250,65 +201,6 @@ class CLIMain:
     #     shutil.rmtree(CPPPMDJSON.CLONEDIR)
     #     # todo refactor
     #     pass  # TODO finish
-
-    @staticmethod
-    def __load_c3pm_json_with_project_check(is_object: bool = False) -> C3PMJSON:
-        """
-        Loads C3PMJSON, checks is project a valid c3pm project.
-        If error occures, error message is being printed and programm execution stops
-        :param is_object: False by default. If True, checks can c3pm commands be applied
-        to this project, otherwise - is project a valid c3pm project to be cloned.
-        :return: C3PMJSON loaded from file c3pm.json in directory called
-        """
-        problem_with_project = CLIMain.ProjectChecker.problem_with_project(is_object)
-        if problem_with_project:
-            CLIMain.Messages.error_message("Bad project:" + problem_with_project)
-            sys.exit()
-        try:
-            c3pm_json = C3PMJSON(load_from_file=True)
-            return c3pm_json
-        except json.decoder.JSONDecodeError:
-            CLIMain.Messages.error_message("bad " + C3PMJSON.C3PM_JSON_FILENAME + " file")
-            sys.exit()
-        except FileNotFoundError:
-            CLIMain.Messages.error_message("no " + C3PMJSON.C3PM_JSON_FILENAME + " file in directory")
-            sys.exit()
-        except C3PMJSON.BadC3PMJSONError as err:
-            CLIMain.Messages.error_message("bad " + C3PMJSON.C3PM_JSON_FILENAME + " in project:" +
-                                    err.problem)
-            sys.exit()
-
-    class Messages:
-        """
-        Class-envelope for CLI messages methods
-        """
-
-        @staticmethod
-        def success_message(message: str):
-            """
-            Writes a success message to stdout (in green)
-            :param message: message to be printed
-            """
-            print(sys.argv[0], end=": ")
-            ColorP.print(message, ColorP.BOLD_GREEN)
-
-        @staticmethod
-        def error_message(message: str):
-            """
-            Writes a success message to stderr (in red)
-            :param message: message to be printed
-            """
-            sys.stderr.write(sys.argv[0] + ": ")
-            ColorP.print(output=message, color=ColorP.BOLD_RED, ostream=sys.stderr)
-
-        @staticmethod
-        def info_message(message: str):
-            """
-            Writes an info message to stdout (in blue)
-            :param message: message to be printed
-            """
-            print(sys.argv[0], end=": ")
-            ColorP.print(message, ColorP.BOLD_BLUE)
 
     class ProjectChecker:
         """
