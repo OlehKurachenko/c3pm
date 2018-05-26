@@ -9,6 +9,8 @@
 #
 
 import os
+import shutil
+import subprocess
 from collections import OrderedDict
 from colored_print import ColoredPrint as ColorP
 import json
@@ -46,6 +48,8 @@ class C3PMProject:
     SRC_DIR = "src"
     EXPORT_DIR = "exports"
     IMPORT_DIR = "imports"
+
+    ROOT_NAME_FOR_DEPENDENCIES_LIST = "~root~project~"
 
     def __init__(self, is_object: bool = False, init_new_project: bool = False):
         """
@@ -172,6 +176,120 @@ class C3PMProject:
             raise ValueError(problem_with_name)
         self.__c3pm_dict["name"] = name
 
+    def list_all_dependencies(self) -> OrderedDict:
+        """
+        Loads all project's dependencies recursively to list all their own dependencies. In the
+        result, a list of all projects which have to be loaded is listed.
+        :raises C3PMProject.BadC3PMProject:
+        :return: list of all dependencies
+        """
+
+        def full_dependency_branch(dependency_name: str) -> str:
+            """
+            Returns one of branches to dependency
+            :param dependency_name:
+            :return: full branch-path to dependency
+            """
+            result = dependency_name
+            next_dependency_name = dependency_name
+            while next_dependency_name != C3PMProject.ROOT_NAME_FOR_DEPENDENCIES_LIST:
+                next_dependency_name = dependency_parent_list[next_dependency_name]
+                result = next_dependency_name + "->" + result
+            return result
+
+        # OrderedDict of all dependencies, will be returned
+        all_dependencies = OrderedDict(self.__c3pm_dict["dependencies"])
+        # OrderedDict of dependencies, which are not yet checked
+        unchecked_dependencies = OrderedDict(self.__c3pm_dict["dependencies"])
+        # dict of dependencies parent name (dependency_name: str -> parent_dependency_name: str)
+        dependency_parent_list = dict()
+
+        os.mkdir(C3PMProject.CLONE_DIR)
+        os.chdir(C3PMProject.CLONE_DIR)
+
+        for cloned_project_dependency_name in all_dependencies:
+            dependency_parent_list[cloned_project_dependency_name] = C3PMProject.ROOT_NAME_FOR_DEPENDENCIES_LIST
+        while len(unchecked_dependencies):
+            unchecked_dependency = unchecked_dependencies.popitem(last=False)
+            unchecked_dependency_name = unchecked_dependency[0]
+            CLIMessage.info_message("cloning " + full_dependency_branch(unchecked_dependency_name) +
+                                    " (" + unchecked_dependency[1]["url"] + ") to " +
+                                    unchecked_dependency_name)
+            os.system("git clone " + unchecked_dependency[1]["url"] + " " +
+                      unchecked_dependency_name)
+            clone_dir_ls = subprocess.check_output(["ls"]).split()
+            if len(clone_dir_ls) == 0:
+                raise self.BadC3PMProject("cloning " + full_dependency_branch(
+                    unchecked_dependency_name) + " (" + unchecked_dependency[1]["url"] + ") to " +
+                                          unchecked_dependency_name + " failed: nothing cloned.")
+            CLIMessage.success_message(unchecked_dependency_name + "cloned")
+
+            os.chdir(unchecked_dependency_name)
+            try:
+                c3pm_cloned_project = C3PMProject()
+                cloned_project_dependencies_dict = c3pm_cloned_project.__c3pm_dict["dependencies"]
+                for cloned_project_dependency_name in cloned_project_dependencies_dict:
+                    if cloned_project_dependency_name in all_dependencies:
+                        if cloned_project_dependencies_dict[cloned_project_dependency_name] != \
+                                all_dependencies[cloned_project_dependency_name]:
+                            raise C3PMProject.BadC3PMProject(
+                                "duplicated dependencies names:\n"
+                                # dependency 1 name =
+                                + full_dependency_branch(cloned_project_dependency_name) + ":\n"
+                                # dependency 1 info =
+                                + json.dumps(all_dependencies[cloned_project_dependency_name],
+                                             indent=4) + "\n"
+                                # dependency 2 name =
+                                + full_dependency_branch(c3pm_cloned_project.name) + "->"
+                                + cloned_project_dependency_name
+                                # dependency 2 info =
+                                + cloned_project_dependencies_dict[cloned_project_dependency_name])
+                    else:
+                        all_dependencies[cloned_project_dependency_name] = OrderedDict(
+                            cloned_project_dependencies_dict[cloned_project_dependency_name])
+                        unchecked_dependencies[cloned_project_dependency_name] = OrderedDict(
+                            cloned_project_dependencies_dict[cloned_project_dependency_name])
+                        dependency_parent_list[cloned_project_dependency_name] = \
+                            c3pm_cloned_project.name
+            except C3PMProject.BadC3PMProject as err:
+                raise C3PMProject.BadC3PMProject("in cloned project " + full_dependency_branch(
+                    unchecked_dependency_name) + ":bad project directory: " + err.problem)
+            except Exception:
+                raise C3PMProject.BadC3PMProject("in cloned project " + full_dependency_branch(
+                    unchecked_dependency_name) + ":unknown error happen, please report that")
+
+        os.chdir("..")
+        shutil.rmtree(C3PMProject.CLONE_DIR)
+        return all_dependencies
+
+    def init_new_json(self):
+        """
+        Initialize new C3PMJSON with data from user via CLI.
+        !!! Do not handle wrong input TODO fix
+        """
+
+        # Getting name
+        while True:
+            name = input("Project name>")
+            problem_with_name = C3PMProject.C3PMJSONChecker.problem_with_name(name)
+            if problem_with_name:
+                ColorP.print("Bad name: " + problem_with_name)
+            else:
+                self.__c3pm_dict["name"] = name
+                break
+
+        self.__c3pm_dict["author"] = input("Author>")
+        self.__c3pm_dict["version"] = "0.0.1"
+        self.__c3pm_dict["description"] = input("Description>")
+        self.__c3pm_dict["url"] = input("Project URL>")
+        self.__c3pm_dict["email"] = input("Project e-mail>")
+        proj_license = input("License (empty line if not exist)>")
+        if proj_license:
+            self.__c3pm_dict["license"] = proj_license
+        self.__c3pm_dict["dependencies"] = OrderedDict()
+        self.__c3pm_dict["c3pm_version"] = self.C3PM_JSON_VERSION
+        self.__c3pm_dict["whatIsC3pm"] = self.WHAT_IS_C3PM_LINK
+
     def write(self):
         """
         Writes/re-writes c3mp.json
@@ -200,6 +318,8 @@ class C3PMProject:
                 C3PMProject.C3PMJSONChecker.problem_with_name(json_representation["name"])
             if problem_with_name:
                 return "bad name:" + problem_with_name
+
+            # TODO write "dependencies" check
 
             return ""
 

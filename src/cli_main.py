@@ -14,7 +14,7 @@ import sys
 
 from c3pm_project import C3PMProject
 from cli_message import CLIMessage
-
+from colored_print import ColoredPrint as ColorP
 
 class CLIMain:
     """
@@ -34,14 +34,16 @@ class CLIMain:
         if len(sys.argv) < 2:
             CLIMessage.error_message("At least one CLI argument expected")  # TODO show usage
             sys.exit()
-        if sys.argv[1] == "init":
-            if len(sys.argv) == 2:
-                CLIMain.__init_project()
-                return
+        if sys.argv[1] == "init" and len(sys.argv) == 2:
+            CLIMain.__init_project()
+            return
         if sys.argv[1] == "add":
             if sys.argv[2] == "git-c3pm":
                 if sys.argv[4] == "master" and len(sys.argv) == 5:
                     pass  # TODO call
+        if sys.argv[1] == "list" and len(sys.argv) == 2:
+            CLIMain.__list_dependencies()
+            return
         pass  # TODO add usage message, probably remove "if len(sys.argv) < 2:"
 
     @staticmethod
@@ -52,7 +54,8 @@ class CLIMain:
         """
 
         try:
-            c3pmjson = C3PMProject(is_object=True, init_new_project=True)
+            c3pm_project = C3PMProject(is_object=True, init_new_project=True)
+            c3pm_project.write()
         except C3PMProject.BadC3PMProject as err:
             CLIMessage.error_message("bad project directory: " + err.problem)
             sys.exit()
@@ -60,8 +63,6 @@ class CLIMain:
             CLIMessage.error_message("unknown error happen, please, report the following on " +
                                      CLIMain.ISSUES_LINK)
             raise
-
-        c3pmjson.write()
         CLIMessage.success_message(C3PMProject.C3PM_JSON_FILENAME + " successfully written")
 
     # @staticmethod
@@ -161,38 +162,26 @@ class CLIMain:
     #                       + project_json.project_name + " succeeded", CLIMain.GREEN)
     #     # todo refactor
 
-    # @staticmethod
-    # def __list_dependencies() -> OrderedDict:
-    #
-    #     c3pm_json = CLIMain.__load_c3pm_json_with_project_check(is_object=True)
-    #
-    #     # todo refactor
-    #     dependencies = OrderedDict(self.__ordered_dict["dependencies"])
-    #     targets = OrderedDict(self.__ordered_dict["dependencies"])
-    #     os.mkdir(CPPPMDJSON.CLONEDIR)  # TODO write
-    #     os.chdir(CPPPMDJSON.CLONEDIR)
-    #     while len(targets):
-    #         dependency = targets.popitem(last=False)
-    #         # TODO handle not git only
-    #         clone_name = str(random.randint(1000000000000, 9999999999999))
-    #         # CPPPMDJSON.__message("DEPENDENCY:" + dependency[0] + " + " + str(dependency[1]), CPPPMDJSON.RED)
-    #         CPPPMDJSON.__message("cloning " + dependency[1]["url"] + " to " + clone_name,
-    #                              CPPPMDJSON.BLUE)
-    #         os.system("git clone " + dependency[1]["url"] + " " + clone_name)
-    #         CPPPMDJSON.__message("cloned", CPPPMDJSON.BLUE)
-    #         os.chdir(clone_name)
-    #         project_json = CPPPMDJSON.__load_project_json()
-    #         for sub_dependency in project_json.__ordered_dict["dependencies"]:
-    #             if sub_dependency not in dependencies:
-    #                 targets[sub_dependency] = \
-    #                     OrderedDict(project_json.__ordered_dict["dependencies"][sub_dependency])
-    #                 dependencies[sub_dependency] = \
-    #                     OrderedDict(project_json.__ordered_dict["dependencies"][sub_dependency])
-    #         os.chdir("..")
-    #     os.chdir("..")
-    #     shutil.rmtree(CPPPMDJSON.CLONEDIR)
-    #     # todo refactor
-    #     pass  # TODO finish
+    @staticmethod
+    def __list_dependencies():
+        try:
+            c3pm_project = C3PMProject(is_object=True)
+            project_dependencies_dict = c3pm_project.list_all_dependencies()
+            ColorP.print("Dependencies for " + c3pm_project.name + ":", ColorP.BOLD_CYAN)
+            for dependency_name in project_dependencies_dict:
+                if project_dependencies_dict[dependency_name]["type"] == "git-c3pm":
+                    ColorP.print("├─── " + dependency_name + "-> ", ColorP.BOLD_CYAN, line_end="")
+                    ColorP.print("type: git-c3pm", ColorP.BOLD_GREEN, line_end="")
+                    ColorP.print(", url: " + project_dependencies_dict[dependency_name]["url"]
+                                 + ", version: " + project_dependencies_dict[dependency_name][
+                                     "version"], ColorP.BOLD_CYAN)
+        except C3PMProject.BadC3PMProject as err:
+            CLIMessage.error_message("bad project: " + err.problem)
+            sys.exit()
+        except Exception:
+            CLIMessage.error_message("unknown error happen, please, report the following on " +
+                                     CLIMain.ISSUES_LINK)
+            raise
 
 
 if __name__ == "__main__":
