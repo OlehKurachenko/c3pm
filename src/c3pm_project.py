@@ -132,34 +132,6 @@ class C3PMProject:
                     raise self.BadC3PMProject("bad " + self.C3PM_JSON_FILENAME + ": "
                                               + problem_with_c3pm_json)
 
-    def init_new_json(self):
-        """
-        Initialize new C3PMJSON with data from user via CLI.
-        !!! Do not handle wrong input TODO fix
-        """
-
-        # Getting name
-        while True:
-            name = input("Project name>")
-            problem_with_name = C3PMProject.C3PMJSONChecker.problem_with_name(name)
-            if problem_with_name:
-                ColorP.print("Bad name: " + problem_with_name)
-            else:
-                self.__c3pm_dict["name"] = name
-                break
-
-        self.__c3pm_dict["author"] = input("Author>")
-        self.__c3pm_dict["version"] = "0.0.1"
-        self.__c3pm_dict["description"] = input("Description>")
-        self.__c3pm_dict["url"] = input("Project URL>")
-        self.__c3pm_dict["email"] = input("Project e-mail>")
-        proj_license = input("License (empty line if not exist)>")
-        if proj_license:
-            self.__c3pm_dict["license"] = proj_license
-        self.__c3pm_dict["dependencies"] = OrderedDict()
-        self.__c3pm_dict["c3pm_version"] = self.C3PM_JSON_VERSION
-        self.__c3pm_dict["whatIsC3pm"] = self.WHAT_IS_C3PM_LINK
-
     @property
     def name(self) -> str:
         return self.__c3pm_dict["name"]
@@ -168,12 +140,15 @@ class C3PMProject:
     def name(self, name: str):
         """
         :param name: new name
-        :raises ValueError: if name is not a valid c3pm-project name
+        :raises ValueError: if name is not a valid c3pm-project name or already used by one of
+        existing dependencies
         TODO rewrite using list
         """
         problem_with_name = C3PMProject.C3PMJSONChecker.problem_with_name(name)
         if problem_with_name:
             raise ValueError(problem_with_name)
+        if name in self.list_all_dependencies():
+            raise ValueError("name is already used by one of dependencies")
         self.__c3pm_dict["name"] = name
 
     def list_all_dependencies(self) -> OrderedDict:
@@ -197,6 +172,7 @@ class C3PMProject:
                 result = next_dependency_name + "->" + result
             return result
 
+        CLIMessage.info_message("Listing all dependencies for project " + self.name)
         # OrderedDict of all dependencies, will be returned
         all_dependencies = OrderedDict(self.__c3pm_dict["dependencies"])
         # OrderedDict of dependencies, which are not yet checked
@@ -208,7 +184,8 @@ class C3PMProject:
         os.chdir(C3PMProject.CLONE_DIR)
 
         for cloned_project_dependency_name in all_dependencies:
-            dependency_parent_list[cloned_project_dependency_name] = C3PMProject.ROOT_NAME_FOR_DEPENDENCIES_LIST
+            dependency_parent_list[cloned_project_dependency_name] = \
+                C3PMProject.ROOT_NAME_FOR_DEPENDENCIES_LIST
         while len(unchecked_dependencies):
             unchecked_dependency = unchecked_dependencies.popitem(last=False)
             unchecked_dependency_name = unchecked_dependency[0]

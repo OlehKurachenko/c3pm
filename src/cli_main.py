@@ -16,6 +16,7 @@ from c3pm_project import C3PMProject
 from cli_message import CLIMessage
 from colored_print import ColoredPrint as ColorP
 
+
 class CLIMain:
     """
     Main class, which encapsulates main functionality
