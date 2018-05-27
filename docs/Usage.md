@@ -57,4 +57,8 @@ It's first agrument have to specify type of dependency, one of the following:
   c3pm add git-c3pm **url** master
   ```
 
+### CLI commands usage examples
+
+
+
 [c3pm_json]: c3pm%20json.md

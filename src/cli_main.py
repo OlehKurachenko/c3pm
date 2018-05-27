@@ -25,13 +25,15 @@ class CLIMain:
 
     """
 
-    ISSUES_LINK = "https://github.com/OlehKurachenko/c3pm/issues"
+    ISSUES_LINK = "https://github.com/c3pm/c3pm/issues"
 
     @staticmethod
     def main():
         """
         Main method
         """
+        sys.argv[0] = "c3pm"
+        
         if len(sys.argv) < 2:
             CLIMessage.error_message("At least one CLI argument expected")  # TODO show usage
             sys.exit()

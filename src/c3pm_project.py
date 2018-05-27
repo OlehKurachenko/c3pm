@@ -42,7 +42,7 @@ class C3PMProject:
     """
 
     C3PM_JSON_VERSION = "v0.2"
-    WHAT_IS_C3PM_LINK = "https://github.com/OlehKurachenko/c3pm"
+    WHAT_IS_C3PM_LINK = "https://github.com/c3pm/c3pm"
     C3PM_JSON_FILENAME = "c3pm.json"
     CLONE_DIR = ".c3pm_clonedir"
     SRC_DIR = "src"
@@ -110,13 +110,13 @@ class C3PMProject:
                     if os.path.isfile(".gitignore"):
                         with open(".gitignore", "r") as gitignore_file:
                             gitignore_content = gitignore_file.read()
-                            if gitignore_content and gitignore_content[len(gitignore_content) -
-                                                                       1] != '\n':
-                                gitignore_content += "\n"
-                            if self.IMPORT_DIR + "/**" not in gitignore_content.split():
-                                gitignore_content += self.IMPORT_DIR + "/**" + "\n"
-                            if self.CLONE_DIR + "/**" not in gitignore_content.split():
-                                gitignore_content += self.CLONE_DIR + "/**" + "\n"
+                    if gitignore_content and gitignore_content[len(gitignore_content) -
+                                                               1] != '\n':
+                        gitignore_content += "\n"
+                    if self.IMPORT_DIR + "/**" not in gitignore_content.split():
+                        gitignore_content += self.IMPORT_DIR + "/**" + "\n"
+                    if self.CLONE_DIR + "/**" not in gitignore_content.split():
+                        gitignore_content += self.CLONE_DIR + "/**" + "\n"
                     with open(".gitignore", "w+") as gitignore_file:
                         gitignore_file.write(gitignore_content)
                     CLIMessage.success_message(".gitinore written")
