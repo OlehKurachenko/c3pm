@@ -60,6 +60,61 @@ It's first agrument have to specify type of dependency, one of the following:
 
 ### CLI commands usage examples
 
+#### init
 
+```
+~/CLionProjects/c3pm_test_libmath$ ls -la
+total 20
+drwxrwxr-x  4 oleh oleh 4096 May 27 22:37 .
+drwxrwxr-x 13 oleh oleh 4096 May 27 22:37 ..
+drwxrwxr-x  8 oleh oleh 4096 May 27 22:38 .git
+drwxrwxr-x  2 oleh oleh 4096 May 27 22:38 .idea
+-rw-rw-r--  1 oleh oleh   64 May 27 22:37 README.md
+~/CLionProjects/c3pm_test_libmath$ c3pm init
+Project name>c3pm_test_libmath
+Author>Oleh Kurachenko
+Description>Test project of type "git-c3pm" for c3pm project
+Project URL>https://github.com/c3pm/c3pm_test_libmath.git
+Project e-mail>oleh.kurachenko@gmail.com
+License (empty line if not exist)>
+c3pm: srcdirectory created
+c3pm: src/exports directory created
+c3pm: src/exports/readme.txt written
+c3pm: .gitinore written
+c3pm: c3pm.json successfully written
+~/CLionProjects/c3pm_test_libmath$ ls -la
+total 32
+drwxrwxr-x  5 oleh oleh 4096 May 27 22:52 .
+drwxrwxr-x 13 oleh oleh 4096 May 27 22:37 ..
+-rw-rw-r--  1 oleh oleh  369 May 27 22:52 c3pm.json
+drwxrwxr-x  8 oleh oleh 4096 May 27 22:38 .git
+-rw-rw-r--  1 oleh oleh   29 May 27 22:52 .gitignore
+drwxrwxr-x  2 oleh oleh 4096 May 27 22:52 .idea
+-rw-rw-r--  1 oleh oleh   64 May 27 22:37 README.md
+drwxrwxr-x  3 oleh oleh 4096 May 27 22:52 src
+~/CLionProjects/c3pm_test_libmath$ cat c3pm.json 
+{
+    "name": "c3pm_test_libmath",
+    "author": "Oleh Kurachenko",
+    "version": "0.0.1",
+    "description": "Test project of type \"git-c3pm\" for c3pm project",
+    "url": "https://github.com/c3pm/c3pm_test_libmath.git",
+    "email": "oleh.kurachenko@gmail.com",
+    "dependencies": {},
+    "c3pm_version": "v0.2",
+    "whatIsC3pm": "https://github.com/c3pm/c3pm"
+}~/CLionProjects/c3pm_test_libmath$ cat .gitignore 
+imports/**
+.c3pm_clonedir/**
+~/CLionProjects/c3pm_test_libmath$ tree
+.
+├── c3pm.json
+├── README.md
+└── src
+    └── exports
+        └── readme.txt
+
+2 directories, 3 files
+```
 
 [c3pm_json]: c3pm%20json.md
