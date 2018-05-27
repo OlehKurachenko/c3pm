@@ -7,9 +7,10 @@
 #### init
 
 Initializes project as c3pm-project.
-Creates (if not exist) **src** and **src/exports** directories,
-and **c3pm.json** file with data form uservia CLI and empty
-dependencies list.
+Creates (if not exist) **src** and **src/exports** directories.
+Directory **src/exports** is being created with file **readme.txt**
+inside of it, which contains a tip. Creates **c3pm.json** file with
+data from user via CLI and empty dependencies list.
 
 If project directory is a git repository (**.git** directory exist
 ), **imports/&ast;&ast;** and **.c3pm_clonedir/&ast;&ast;** are being

@@ -54,8 +54,9 @@ class C3PMProject:
     def __init__(self, is_object: bool = False, init_new_project: bool = False):
         """
         If init_new_project is True, directory is checked and if all ok, new c3pm project is
-        being initiated by creating new c3pm.json, creating directories "src" and "src/exports",
-        and making changed to ".gitignore" if this file exist.
+        being initiated by creating new c3pm.json, creating directories "src" and "src/exports" (
+        if they do not exist, with file "readme.txt" inside of "src/exports") and making changed
+        to ".gitignore" if this file exist.
         If init_new_project is False, project is checked and c3pm.json is being read.
         :param is_object: False by default. If True, checks can c3pm commands be applied
         to this project, otherwise - is project a valid c3pm project to be cloned.
