@@ -66,6 +66,7 @@ class C3PMProject:
         :raises json.decoder.JSONDecodeError: if json_str is not a valid json
         :raises FileNotFoundError: if self.C3PM_JSON_FILENAME cannot be opened
         :raises AssertionError: if call parameters are forbidden
+        TODO rewrite constructor removing exceptions except BadC3PMProject and AssetionError
         """
 
         assert type(is_object) == bool, "argument is_object have to bool"
@@ -151,6 +152,48 @@ class C3PMProject:
             raise ValueError("name is already used by one of dependencies")
         self.__c3pm_dict["name"] = name
 
+    def add_c3pm_dependency(self, name: str, url: str, version: str = "master"):
+        """
+        Adds new dependency of type git-c3pm (see docs)
+        :param name: name for new dependency (have to be identical with the name of that project)
+        :param url: url of .git repository
+        :param version: have to be "master" by now
+        :raises C3PMProject.BadValue: if any of parameters have incorrect value
+        """
+
+        temporary_directory_name = "~tempdir~"
+
+        if version != "master":
+            raise C3PMProject.BadValue("version", 'have to be "master"')
+
+        try:
+            os.mkdir(C3PMProject.CLONE_DIR)
+            os.chdir(C3PMProject.CLONE_DIR)
+            C3PMProject.clone_git_repository('repository for new dependency "' + name + '"', url,
+                                             temporary_directory_name)
+        except C3PMProject.BadValue:
+            raise
+        else:
+            try:
+                os.chdir(temporary_directory_name)
+                c3pm_project = C3PMProject()
+            except C3PMProject.BadC3PMProject as err:
+                raise C3PMProject.BadValue("url", "in cloned project by this url:" + str(err))
+            else:
+                if c3pm_project.name != name:
+                    raise C3PMProject.BadValue("name", "does not match project name (in " +
+                                               C3PMProject.C3PM_JSON_FILENAME + ")")
+                self.__c3pm_dict["dependencies"][name] = OrderedDict()
+                self.__c3pm_dict["dependencies"][name]["type"] = "git-c3pm"
+                self.__c3pm_dict["dependencies"][name]["url"] = url
+                self.__c3pm_dict["dependencies"][name]["version"] = "master"
+            finally:
+                os.chdir("..")
+                shutil.rmtree(temporary_directory_name)
+        finally:
+            os.chdir("..")
+            shutil.rmtree(C3PMProject.CLONE_DIR)
+
     def list_all_dependencies(self) -> OrderedDict:
         """
         Loads all project's dependencies recursively to list all their own dependencies. In the
@@ -158,6 +201,7 @@ class C3PMProject:
         :raises C3PMProject.BadC3PMProject:
         :return: list of all dependencies
         """
+        # TODO clean clone dir
 
         def full_dependency_branch(dependency_name: str) -> str:
             """
@@ -189,52 +233,51 @@ class C3PMProject:
         while len(unchecked_dependencies):
             unchecked_dependency = unchecked_dependencies.popitem(last=False)
             unchecked_dependency_name = unchecked_dependency[0]
-            CLIMessage.info_message("cloning " + full_dependency_branch(unchecked_dependency_name) +
-                                    " (" + unchecked_dependency[1]["url"] + ") to " +
-                                    unchecked_dependency_name)
-            os.system("git clone " + unchecked_dependency[1]["url"] + " " +
-                      unchecked_dependency_name)
-            clone_dir_ls = subprocess.check_output(["ls"]).split()
-            if len(clone_dir_ls) == 0:
-                raise self.BadC3PMProject("cloning " + full_dependency_branch(
-                    unchecked_dependency_name) + " (" + unchecked_dependency[1]["url"] + ") to " +
-                                          unchecked_dependency_name + " failed: nothing cloned.")
-            CLIMessage.success_message(unchecked_dependency_name + "cloned")
 
-            os.chdir(unchecked_dependency_name)
             try:
-                c3pm_cloned_project = C3PMProject()
-                cloned_project_dependencies_dict = c3pm_cloned_project.__c3pm_dict["dependencies"]
-                for cloned_project_dependency_name in cloned_project_dependencies_dict:
-                    if cloned_project_dependency_name in all_dependencies:
-                        if cloned_project_dependencies_dict[cloned_project_dependency_name] != \
-                                all_dependencies[cloned_project_dependency_name]:
-                            raise C3PMProject.BadC3PMProject(
-                                "duplicated dependencies names:\n"
-                                # dependency 1 name =
-                                + full_dependency_branch(cloned_project_dependency_name) + ":\n"
-                                # dependency 1 info =
-                                + json.dumps(all_dependencies[cloned_project_dependency_name],
-                                             indent=4) + "\n"
-                                # dependency 2 name =
-                                + full_dependency_branch(c3pm_cloned_project.name) + "->"
-                                + cloned_project_dependency_name
-                                # dependency 2 info =
-                                + cloned_project_dependencies_dict[cloned_project_dependency_name])
-                    else:
-                        all_dependencies[cloned_project_dependency_name] = OrderedDict(
-                            cloned_project_dependencies_dict[cloned_project_dependency_name])
-                        unchecked_dependencies[cloned_project_dependency_name] = OrderedDict(
-                            cloned_project_dependencies_dict[cloned_project_dependency_name])
-                        dependency_parent_list[cloned_project_dependency_name] = \
-                            c3pm_cloned_project.name
-            except C3PMProject.BadC3PMProject as err:
-                raise C3PMProject.BadC3PMProject("in cloned project " + full_dependency_branch(
-                    unchecked_dependency_name) + ":bad project directory: " + err.problem)
-            except Exception:
-                raise C3PMProject.BadC3PMProject("in cloned project " + full_dependency_branch(
-                    unchecked_dependency_name) + ":unknown error happen, please report that")
-
+                C3PMProject.clone_git_repository(full_dependency_branch(
+                    unchecked_dependency_name), unchecked_dependency[1]["url"],
+                    unchecked_dependency_name)
+            except C3PMProject.BadValue as err:
+                raise C3PMProject.BadC3PMProject(str(err))
+            else:
+                os.chdir(unchecked_dependency_name)
+                try:
+                    c3pm_cloned_project = C3PMProject()
+                    cloned_project_dependencies_dict = \
+                        c3pm_cloned_project.__c3pm_dict["dependencies"]
+                    for cloned_project_dependency_name in cloned_project_dependencies_dict:
+                        if cloned_project_dependency_name in all_dependencies:
+                            if cloned_project_dependencies_dict[cloned_project_dependency_name] != \
+                                    all_dependencies[cloned_project_dependency_name]:
+                                raise C3PMProject.BadC3PMProject(
+                                    "duplicated dependencies names:\n"
+                                    # dependency 1 name =
+                                    + full_dependency_branch(cloned_project_dependency_name) + ":\n"
+                                    # dependency 1 info =
+                                    + json.dumps(all_dependencies[cloned_project_dependency_name],
+                                                 indent=4) + "\n"
+                                    # dependency 2 name =
+                                    + full_dependency_branch(c3pm_cloned_project.name) + "->"
+                                    + cloned_project_dependency_name
+                                    # dependency 2 info =
+                                    + cloned_project_dependencies_dict[
+                                        cloned_project_dependency_name])
+                        else:
+                            all_dependencies[cloned_project_dependency_name] = OrderedDict(
+                                cloned_project_dependencies_dict[cloned_project_dependency_name])
+                            unchecked_dependencies[cloned_project_dependency_name] = OrderedDict(
+                                cloned_project_dependencies_dict[cloned_project_dependency_name])
+                            dependency_parent_list[cloned_project_dependency_name] = \
+                                c3pm_cloned_project.name
+                except C3PMProject.BadC3PMProject as err:
+                    raise C3PMProject.BadC3PMProject("in cloned project " + full_dependency_branch(
+                        unchecked_dependency_name) + ":bad project directory: " + err.problem)
+                except Exception:
+                    raise C3PMProject.BadC3PMProject("in cloned project " + full_dependency_branch(
+                        unchecked_dependency_name) + ":unknown error happen, please report that")
+                os.chdir("..")
+                shutil.rmtree(unchecked_dependency_name)
         os.chdir("..")
         shutil.rmtree(C3PMProject.CLONE_DIR)
         return all_dependencies
@@ -381,3 +424,41 @@ class C3PMProject:
 
         def __init__(self, problem: str):
             self.problem = problem
+
+    class BadValue(Exception):
+        """
+        Raised when value passed to some method of C3PMProject is not correct
+
+        Attributes:
+            __problem_object -- meaning or name of parameter to which wrong value was passed
+            __problem -- a problem with value
+        """
+
+        def __init__(self, problem_object: str, problem: str):
+            self.__problem_object = str(problem_object)
+            self.__problem = str(problem)
+
+        def __str__(self):
+            return "bad value of " + self.__problem_object + ": " + self.__problem
+
+    @staticmethod
+    def clone_git_repository(name: str, url: str, target_directory_name: str):
+        """
+        Clones git repository by url and checks is it cloned correct
+        :param name: name of project which will be cloned
+        :param url: url of .git repository
+        :param target_directory_name: a directory name for cloning
+        :raises C3PMProject.BadValue: if cloning failed
+        """
+
+        CLIMessage.info_message("cloning " + name + " (" + url + ") to " + target_directory_name)
+        os.system("git clone " + url + " " + target_directory_name)
+        clone_dir_ls = subprocess.check_output(["ls"]).split()
+        if len(clone_dir_ls) == 0:
+            raise C3PMProject.BadValue("url", "cloning " + name + " (" + url + ") to " +
+                                       target_directory_name + " failed: nothing cloned.")
+        if len(clone_dir_ls) != 1:
+            raise C3PMProject.BadValue("url", "cloning " + name + " (" + url + ") to " +
+                                       target_directory_name + " failed: to many directories in "
+                                                               "clone directory.")
+        CLIMessage.success_message(name + "cloned")
