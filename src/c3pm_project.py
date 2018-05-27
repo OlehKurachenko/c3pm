@@ -98,6 +98,12 @@ class C3PMProject:
                     os.mkdir(self.SRC_DIR + "/" + self.EXPORT_DIR)
                     CLIMessage.success_message(self.SRC_DIR + "/" + self.EXPORT_DIR
                                                + " directory created")
+                    with open(self.SRC_DIR + "/" + self.EXPORT_DIR + "/readme.txt", "w+") as \
+                            readme_file:
+                        readme_file.write("place your files which have to be taken by a dependent "
+                                          "project")
+                        CLIMessage.success_message(self.SRC_DIR + "/" + self.EXPORT_DIR +
+                                                   "/readme.txt written")
             except:
                 raise self.BadC3PMProject("unable to create directory " + self.SRC_DIR + "/"
                                           + self.EXPORT_DIR)
