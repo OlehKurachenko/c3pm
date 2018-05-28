@@ -172,6 +172,9 @@ class C3PMProject:
 
         if version != "master":
             raise C3PMProject.BadValue("version", 'have to be "master"')
+        if name in self.list_all_dependencies():
+            raise C3PMProject.BadValue("name", "dependency with this name already exist, "
+                                               "use list to see")
 
         try:
             os.mkdir(C3PMProject.CLONE_DIR)
