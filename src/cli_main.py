@@ -96,7 +96,7 @@ class CLIMain:
             raise
         else:
             CLIMessage.success_message("dependency " + name + " (type: git-c3pm, url: " + git_url +
-                                       ", version: master")
+                                       ", version: master) successfully added to project")
 
     @staticmethod
     def __list_dependencies():
