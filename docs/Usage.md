@@ -188,4 +188,41 @@ c3pm: dependency c3pm_test_libmath (type: git-c3pm, url: https://github.com/c3pm
 }
 ```
 
+#### remove
+
+```
+~/CLionProjects/c3pm_test_polinomial$ cat c3pm.json 
+{
+    "name": "c3pm_test_polinomial",
+    "author": "Oleh Kurachenko",
+    "version": "0.0.1",
+    "description": "Test project of type \"git-c3pm\" for project c3pm",
+    "url": "https://github.com/c3pm/c3pm_test_polinomial.git",
+    "email": "oleh.kurachenko@gmail.com",
+    "dependencies": {
+        "c3pm_test_libmath": {
+            "type": "git-c3pm",
+            "url": "https://github.com/c3pm/c3pm_test_libmath.git",
+            "version": "master"
+        }
+    },
+    "c3pm_version": "v0.2",
+    "whatIsC3pm": "https://github.com/c3pm/c3pm"
+}~/CLionProjects/c3pm_test_polinomial$ c3pm remove c3pm_test_libmath master
+directory to be removed: c3pm_test_libmath -> type: git-c3pm , url: https://github.com/c3pm/c3pm_test_libmath.git , version: master
+c3pm: dependency c3pm_test_libmath(version master successfully removed
+~/CLionProjects/c3pm_test_polinomial$ cat c3pm.json 
+{
+    "name": "c3pm_test_polinomial",
+    "author": "Oleh Kurachenko",
+    "version": "0.0.1",
+    "description": "Test project of type \"git-c3pm\" for project c3pm",
+    "url": "https://github.com/c3pm/c3pm_test_polinomial.git",
+    "email": "oleh.kurachenko@gmail.com",
+    "dependencies": {},
+    "c3pm_version": "v0.2",
+    "whatIsC3pm": "https://github.com/c3pm/c3pm"
+}
+```
+
 [c3pm_json]: c3pm%20json.md
