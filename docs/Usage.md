@@ -56,6 +56,16 @@ It's first agrument have to specify type of dependency, one of the following:
   c3pm add git-c3pm c3pm_test_libmath https://github.com/c3pm/c3pm_test_libmath.git master
   ```
 
+#### remove
+
+Removes existing dependency from project (it's [c3pm.json][c3pm_json]). Two
+arguments have to be provided: dependencies name and it's version.
+
+Exapmle:
+```bash
+c3pm remove c3pm_test_libmath
+```
+
 ### CLI commands usage examples
 
 #### init

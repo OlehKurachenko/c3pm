@@ -45,6 +45,9 @@ class CLIMain:
                 if sys.argv[5] == "master" and len(sys.argv) == 6:
                     CLIMain.__add_git_c3pm_dependency(sys.argv[3], sys.argv[4])
                     return
+        if sys.argv[1] == "remove" and len(sys.argv) == 4:
+            CLIMain.__remove_dependency(sys.argv[2], sys.argv[3])
+            return
         if sys.argv[1] == "list" and len(sys.argv) == 2:
             CLIMain.__list_dependencies()
             return
@@ -95,8 +98,29 @@ class CLIMain:
                                      CLIMain.ISSUES_LINK)
             raise
         else:
-            CLIMessage.success_message("dependency " + name + " (type: git-c3pm, url: " + git_url +
-                                       ", version: master) successfully added to project")
+            CLIMessage.success_message("dependency "
+                                       + c3pm_project.dependency_str_representation(name)
+                                       + " successfully added to project")
+
+    @staticmethod
+    def __remove_dependency(name: str, version: str = "master"):
+        try:
+            c3pm_project = C3PMProject(is_object=True)
+            c3pm_project.remove_dependency(name, version)
+            c3pm_project.write()
+        except C3PMProject.BadC3PMProject as err:
+            CLIMessage.error_message("bad project: " + err.problem)
+            sys.exit()
+        except C3PMProject.BadValue as err:
+            CLIMessage.error_message("bad argument: " + str(err))
+            sys.exit()
+        except Exception:
+            CLIMessage.error_message("unknown error happen, please, report the following on " +
+                                     CLIMain.ISSUES_LINK)
+            raise
+        else:
+            CLIMessage.success_message("dependency " + name + "(version " + version
+                                       + " successfully removed")
 
     @staticmethod
     def __list_dependencies():
@@ -107,12 +131,9 @@ class CLIMain:
                 ColorP.print("Dependencies for " + c3pm_project.name + ":", ColorP.BOLD_CYAN)
                 for dependency_name in project_dependencies_dict:
                     if project_dependencies_dict[dependency_name]["type"] == "git-c3pm":
-                        ColorP.print("├─── " + dependency_name + "-> ", ColorP.BOLD_CYAN,
-                                     line_end="")
-                        ColorP.print("type: git-c3pm", ColorP.BOLD_GREEN, line_end="")
-                        ColorP.print(", url: " + project_dependencies_dict[dependency_name]["url"]
-                                     + ", version: " + project_dependencies_dict[dependency_name][
-                                         "version"], ColorP.BOLD_CYAN)
+                        ColorP.print("├─── ", ColorP.BOLD_CYAN, line_end="")
+                        print(c3pm_project.dependency_str_representation(dependency_name,
+                                                                         colored=True))
             else:
                 ColorP.print("Project " + c3pm_project.name + " doesn't have any dependencies",
                              ColorP.BOLD_CYAN)

@@ -201,6 +201,49 @@ class C3PMProject:
             os.chdir("..")
             shutil.rmtree(C3PMProject.CLONE_DIR)
 
+    def remove_dependency(self, name: str, version: str = "master"):
+        """
+        Removes dependency from project.
+        :param name: name of dependency to be removed
+        :param version: version of dependency to be removed, have to be "master" at this moment
+        """
+        if version != "master":
+            raise self.BadValue("version", 'have to be "master"')
+        for dependency_name in self.__c3pm_dict["dependencies"]:
+            if dependency_name == name:
+                ColorP.print("directory to be removed", line_end=": ", color=ColorP.BOLD_CYAN)
+                print(self.dependency_str_representation(dependency_name, colored=True))
+                del self.__c3pm_dict["dependencies"][dependency_name]
+                return
+        raise self.BadValue("name", "no such dependency")
+
+    def dependency_str_representation(self, dependency_name: str, colored: bool = False) -> str:
+        """
+        Returns str representation of dependency, one line, easy human readable.
+        :param dependency_name:
+        :param colored: if True, line is colored using color constants from
+        colored_print.ColoredPrint
+        :return: str representation
+        """
+        # Color constants
+        bold_cyan = ""
+        bold_green = ""
+        bold_yellow = ""
+        reset = ""
+        if colored:
+            bold_cyan = ColorP.BOLD_CYAN
+            bold_green = ColorP.BOLD_GREEN
+            bold_yellow = ColorP.BOLD_YELLOW
+            reset = ColorP.RESET
+
+        dependency = self.__c3pm_dict["dependencies"][dependency_name]
+        result = bold_green + dependency_name + bold_cyan + " -> " + bold_yellow + "type: " + \
+            dependency["type"] + bold_cyan
+        if dependency["type"] == "git-c3pm":
+            result += " , url: " + dependency["url"] + " , version: " + dependency["version"] + \
+                      reset
+        return result
+
     def list_all_dependencies(self) -> OrderedDict:
         """
         Loads all project's dependencies recursively to list all their own dependencies. In the
@@ -208,6 +251,7 @@ class C3PMProject:
         :raises C3PMProject.BadC3PMProject:
         :return: list of all dependencies
         """
+
         # TODO clean clone dir
 
         def full_dependency_branch(dependency_name: str) -> str:
@@ -366,7 +410,7 @@ class C3PMProject:
             for i, character in enumerate(name, start=1):
                 if character not in (C3PMProject.C3PMJSONChecker.ALLOWED_CHARACTERS
                                      + C3PMProject.C3PMJSONChecker.ALLOWED_SPECIAL_CHARACTERS):
-                    return "name have bad character '" + character + "' (code "\
+                    return "name have bad character '" + character + "' (code " \
                            + str(ord(character)) + ") at position " + str(i)
             if name[0] not in C3PMProject.C3PMJSONChecker.ALLOWED_CHARACTERS:
                 return "first character is not a latin letter"

@@ -22,7 +22,7 @@ class ColoredPrint:
     BOLD_GREEN = "\033[1;32m"
     BOLD_YELLOW = "\033[1;33m"
 
-    __RESET = "\033[0;0m"
+    RESET = "\033[0;0m"
 
     BOLD = "\033[;1m"
 
@@ -41,5 +41,5 @@ class ColoredPrint:
             ostream.write(color)
         ostream.write(output)
         if color:
-            ostream.write(ColoredPrint.__RESET)
+            ostream.write(ColoredPrint.RESET)
         ostream.write(line_end)
