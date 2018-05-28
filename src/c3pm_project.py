@@ -468,4 +468,4 @@ class C3PMProject:
             raise C3PMProject.BadValue("url", "cloning " + name + " (" + url + ") to " +
                                        target_directory_name + " failed: to many directories in "
                                                                "clone directory.")
-        CLIMessage.success_message(name + "cloned")
+        CLIMessage.success_message(name + " cloned")
