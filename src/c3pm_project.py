@@ -91,7 +91,7 @@ class C3PMProject:
             try:
                 if not os.path.isdir(self.SRC_DIR):
                     os.mkdir(self.SRC_DIR)
-                    CLIMessage.success_message(self.SRC_DIR + "directory created")
+                    CLIMessage.success_message(self.SRC_DIR + " directory created")
             except:
                 raise self.BadC3PMProject("unable to create directory " + self.SRC_DIR)
             try:
