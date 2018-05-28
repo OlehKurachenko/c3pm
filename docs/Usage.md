@@ -21,7 +21,6 @@ Existence of **src** or **src/exports** as file and **c3pm.json** as
 directory causes an error. Existence of **c3pm.json** as file causes a
 termination - file have to be deteled to re-init project.
 
-<!--- TODO add real example --->
 Example: 
 ```bash
 c3pm init
@@ -34,7 +33,6 @@ being loaded to look on their own [c3pm.json][c3pm_json] file to get list
 of dependencies. At the result, a list of all projects which have to be
 loaded is printed with proper data about them.
 
-<!--- TODO add real example --->
 Example:
 ```bash
 c3pm list
@@ -52,7 +50,7 @@ It's first agrument have to specify type of dependency, one of the following:
     project (from [c3pm.json][c3pm_json] of it's git repository)
   * **url** - url of git repository of dependency
   * **version** - at this very moment, have to be exactly "master"
-  <!--- TODO add real example --->
+  
   Example:
   ```bash
   c3pm add git-c3pm c3pm_test_libmath https://github.com/c3pm/c3pm_test_libmath.git master
