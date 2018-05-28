@@ -336,6 +336,26 @@ class C3PMProject:
         shutil.rmtree(C3PMProject.CLONE_DIR)
         return all_dependencies
 
+    def update_dependencies(self):
+        """
+        Updates all dependencies in import directory
+        """
+        temporary_prefix = "~~temp~~"
+
+        if os.path.isdir(C3PMProject.IMPORT_DIR):
+            shutil.rmtree(C3PMProject.IMPORT_DIR)
+        os.mkdir(C3PMProject.IMPORT_DIR)
+        os.chdir(C3PMProject.IMPORT_DIR)
+        dependencies_list = self.list_all_dependencies()
+        for dependency_name in dependencies_list:
+            if dependencies_list[dependency_name]["type"] == "git-c3pm":
+                C3PMProject.clone_git_repository(dependency_name, dependencies_list[
+                    dependency_name]["url"], temporary_prefix + dependency_name)
+                shutil.copytree(temporary_prefix + dependency_name + "/" + C3PMProject.SRC_DIR +
+                                "/" + C3PMProject.EXPORT_DIR, dependency_name)
+                shutil.rmtree(temporary_prefix + dependency_name)
+        os.chdir("..")
+
     def init_new_json(self):
         """
         Initialize new C3PMJSON with data from user via CLI.

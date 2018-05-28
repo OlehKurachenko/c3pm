@@ -48,6 +48,9 @@ class CLIMain:
         if sys.argv[1] == "remove" and len(sys.argv) == 4:
             CLIMain.__remove_dependency(sys.argv[2], sys.argv[3])
             return
+        if sys.argv[1] == "update" and len(sys.argv) == 2:
+            CLIMain.__update_dependencies()
+            return
         if sys.argv[1] == "list" and len(sys.argv) == 2:
             CLIMain.__list_dependencies()
             return
@@ -104,6 +107,11 @@ class CLIMain:
 
     @staticmethod
     def __remove_dependency(name: str, version: str = "master"):
+        """
+        Removes dependencies from project
+        :param name: name of dependency to be removed
+        :param version: version of dependency to be removed, have to be "master" at this moment
+        """
         try:
             c3pm_project = C3PMProject(is_object=True)
             c3pm_project.remove_dependency(name, version)
@@ -124,6 +132,9 @@ class CLIMain:
 
     @staticmethod
     def __list_dependencies():
+        """
+        Lists all dependencies to CLI
+        """
         try:
             c3pm_project = C3PMProject(is_object=True)
             project_dependencies_dict = c3pm_project.list_all_dependencies()
@@ -144,6 +155,24 @@ class CLIMain:
             CLIMessage.error_message("unknown error happen, please, report the following on " +
                                      CLIMain.ISSUES_LINK)
             raise
+
+    @staticmethod
+    def __update_dependencies():
+        """
+        Updates all dependencies in project
+        """
+        try:
+            c3pm_project = C3PMProject(is_object=True)
+            c3pm_project.update_dependencies()
+        except C3PMProject.BadC3PMProject as err:
+            CLIMessage.error_message("bad project: " + err.problem)
+            sys.exit()
+        except Exception:
+            CLIMessage.error_message("unknown error happen, please, report the following on " +
+                                     CLIMain.ISSUES_LINK)
+            raise
+        else:
+            CLIMessage.success_message("project successfully updated")
 
 
 if __name__ == "__main__":

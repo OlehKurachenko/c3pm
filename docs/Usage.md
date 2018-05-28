@@ -66,6 +66,17 @@ Exapmle:
 c3pm remove c3pm_test_libmath
 ```
 
+#### update
+
+Updates all dependencies in project according to it's [c3pm.json][c3pm_json].
+Data is being loaded and imports are being loaded to proper directory. Previous
+version of directory is being deleted.
+
+Example:
+```bash
+c3pm update
+```
+
 ### CLI commands usage examples
 
 #### init
