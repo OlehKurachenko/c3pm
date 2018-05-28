@@ -55,7 +55,7 @@ It's first agrument have to specify type of dependency, one of the following:
   <!--- TODO add real example --->
   Example:
   ```bash
-  c3pm add git-c3pm **url** master
+  c3pm add git-c3pm c3pm_test_libmath https://github.com/c3pm/c3pm_test_libmath.git master
   ```
 
 ### CLI commands usage examples
@@ -115,6 +115,69 @@ imports/**
         └── readme.txt
 
 2 directories, 3 files
+```
+
+#### list
+
+```
+~/CLionProjects/c3pm_test_polinomial$ c3pm list
+c3pm: Listing all dependencies for project c3pm_test_polinomial
+c3pm: cloning ~root~project~->c3pm_test_libmath (https://github.com/c3pm/c3pm_test_libmath.git) to c3pm_test_libmath
+Cloning into 'c3pm_test_libmath'...
+remote: Counting objects: 19, done.
+remote: Compressing objects: 100% (13/13), done.
+remote: Total 19 (delta 2), reused 16 (delta 2), pack-reused 0
+Unpacking objects: 100% (19/19), done.
+Checking connectivity... done.
+c3pm: ~root~project~->c3pm_test_libmath cloned
+Dependencies for c3pm_test_polinomial:
+├─── c3pm_test_libmath-> type: git-c3pm, url: https://github.com/c3pm/c3pm_test_libmath.git, version: master
+```
+
+#### add
+
+#### git-c3pm
+
+```
+~/CLionProjects/c3pm_test_polinomial$ cat c3pm.json 
+{
+    "name": "c3pm_test_polinomial",
+    "author": "Oleh Kurachenko",
+    "version": "0.0.1",
+    "description": "Test project of type \"git-c3pm\" for project c3pm",
+    "url": "https://github.com/c3pm/c3pm_test_polinomial.git",
+    "email": "oleh.kurachenko@gmail.com",
+    "dependencies": {},
+    "c3pm_version": "v0.2",
+    "whatIsC3pm": "https://github.com/c3pm/c3pm"
+}~/CLionProjects/c3pm_test_polinomial$ c3pm add git-c3pm c3pm_test_libmath https://github.com/c3pm/c3pm_test_libmath.git master
+c3pm: cloning repository for new dependency "c3pm_test_libmath" (https://github.com/c3pm/c3pm_test_libmath.git) to ~tempdir~
+Cloning into '~tempdir~'...
+remote: Counting objects: 19, done.
+remote: Compressing objects: 100% (13/13), done.
+remote: Total 19 (delta 2), reused 16 (delta 2), pack-reused 0
+Unpacking objects: 100% (19/19), done.
+Checking connectivity... done.
+c3pm: repository for new dependency "c3pm_test_libmath" cloned
+c3pm: dependency c3pm_test_libmath (type: git-c3pm, url: https://github.com/c3pm/c3pm_test_libmath.git, version: master) successfully added to project
+~/CLionProjects/c3pm_test_polinomial$ cat c3pm.json 
+{
+    "name": "c3pm_test_polinomial",
+    "author": "Oleh Kurachenko",
+    "version": "0.0.1",
+    "description": "Test project of type \"git-c3pm\" for project c3pm",
+    "url": "https://github.com/c3pm/c3pm_test_polinomial.git",
+    "email": "oleh.kurachenko@gmail.com",
+    "dependencies": {
+        "c3pm_test_libmath": {
+            "type": "git-c3pm",
+            "url": "https://github.com/c3pm/c3pm_test_libmath.git",
+            "version": "master"
+        }
+    },
+    "c3pm_version": "v0.2",
+    "whatIsC3pm": "https://github.com/c3pm/c3pm"
+}
 ```
 
 [c3pm_json]: c3pm%20json.md
