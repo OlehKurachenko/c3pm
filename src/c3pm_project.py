@@ -340,21 +340,23 @@ class C3PMProject:
         """
         Updates all dependencies in import directory
         """
-        temporary_prefix = "~~temp~~"
 
         if os.path.isdir(C3PMProject.IMPORT_DIR):
             shutil.rmtree(C3PMProject.IMPORT_DIR)
         os.mkdir(C3PMProject.IMPORT_DIR)
-        os.chdir(C3PMProject.IMPORT_DIR)
+        os.mkdir(C3PMProject.CLONE_DIR)
+        os.chdir(C3PMProject.CLONE_DIR)
         dependencies_list = self.list_all_dependencies()
         for dependency_name in dependencies_list:
             if dependencies_list[dependency_name]["type"] == "git-c3pm":
                 C3PMProject.clone_git_repository(dependency_name, dependencies_list[
-                    dependency_name]["url"], temporary_prefix + dependency_name)
-                shutil.copytree(temporary_prefix + dependency_name + "/" + C3PMProject.SRC_DIR +
-                                "/" + C3PMProject.EXPORT_DIR, dependency_name)
-                shutil.rmtree(temporary_prefix + dependency_name)
+                    dependency_name]["url"], dependency_name)
+                shutil.copytree(dependency_name + "/" + C3PMProject.SRC_DIR +
+                                "/" + C3PMProject.EXPORT_DIR, "../" + C3PMProject.IMPORT_DIR +
+                                "/" + dependency_name)
+                shutil.rmtree(dependency_name)
         os.chdir("..")
+        os.rmdir(C3PMProject.CLONE_DIR)
 
     def init_new_json(self):
         """
