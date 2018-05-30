@@ -33,7 +33,7 @@ class CLIMain:
         Main method
         """
         sys.argv[0] = "c3pm"
-        
+
         if len(sys.argv) < 2:
             CLIMessage.error_message("At least one CLI argument expected")  # TODO show usage
             sys.exit()
@@ -101,9 +101,8 @@ class CLIMain:
                                      CLIMain.ISSUES_LINK)
             raise
         else:
-            CLIMessage.success_message("dependency "
-                                       + c3pm_project.dependency_str_representation(name)
-                                       + " successfully added to project")
+            CLIMessage.success_message("dependency " + C3PMProject.dependency_str_representation(
+                name, c3pm_project.dependency_data(name)) + " successfully added to project")
 
     @staticmethod
     def __remove_dependency(name: str, version: str = "master"):
@@ -143,8 +142,9 @@ class CLIMain:
                 for dependency_name in project_dependencies_dict:
                     if project_dependencies_dict[dependency_name]["type"] == "git-c3pm":
                         ColorP.print("├─── ", ColorP.BOLD_CYAN, line_end="")
-                        print(c3pm_project.dependency_str_representation(dependency_name,
-                                                                         colored=True))
+                        print(C3PMProject.dependency_str_representation(
+                            dependency_name, project_dependencies_dict[dependency_name],
+                            colored=True))
             else:
                 ColorP.print("Project " + c3pm_project.name + " doesn't have any dependencies",
                              ColorP.BOLD_CYAN)

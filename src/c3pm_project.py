@@ -12,6 +12,8 @@ import os
 import shutil
 import subprocess
 from collections import OrderedDict
+from re import search
+
 from colored_print import ColoredPrint as ColorP
 import json
 
@@ -159,6 +161,15 @@ class C3PMProject:
             raise ValueError("name is already used by one of dependencies")
         self.__c3pm_dict["name"] = name
 
+    def dependency_data(self, name: str) -> OrderedDict:
+        """
+        Returns dependency data, which is actually a containment of c3pm.json's "dependencies" by
+        name key
+        :param name:
+        :return:
+        """
+        return self.__c3pm_dict["dependencies"][name]
+
     def add_c3pm_dependency(self, name: str, url: str, version: str = "master"):
         """
         Adds new dependency of type git-c3pm (see docs)
@@ -217,37 +228,12 @@ class C3PMProject:
         for dependency_name in self.__c3pm_dict["dependencies"]:
             if dependency_name == name:
                 ColorP.print("directory to be removed", line_end=": ", color=ColorP.BOLD_CYAN)
-                print(self.dependency_str_representation(dependency_name, colored=True))
+                print(C3PMProject.dependency_str_representation(
+                    dependency_name, self.__c3pm_dict["dependencies"][dependency_name],
+                    colored=True))
                 del self.__c3pm_dict["dependencies"][dependency_name]
                 return
         raise self.BadValue("name", "no such dependency")
-
-    def dependency_str_representation(self, dependency_name: str, colored: bool = False) -> str:
-        """
-        Returns str representation of dependency, one line, easy human readable.
-        :param dependency_name:
-        :param colored: if True, line is colored using color constants from
-        colored_print.ColoredPrint
-        :return: str representation
-        """
-        # Color constants
-        bold_cyan = ""
-        bold_green = ""
-        bold_yellow = ""
-        reset = ""
-        if colored:
-            bold_cyan = ColorP.BOLD_CYAN
-            bold_green = ColorP.BOLD_GREEN
-            bold_yellow = ColorP.BOLD_YELLOW
-            reset = ColorP.RESET
-
-        dependency = self.__c3pm_dict["dependencies"][dependency_name]
-        result = bold_green + dependency_name + bold_cyan + " -> " + bold_yellow + "type: " + \
-            dependency["type"] + bold_cyan
-        if dependency["type"] == "git-c3pm":
-            result += " , url: " + dependency["url"] + " , version: " + dependency["version"] + \
-                      reset
-        return result
 
     def list_all_dependencies(self) -> OrderedDict:
         """
@@ -540,3 +526,32 @@ class C3PMProject:
                                        target_directory_name + " failed: to many directories in "
                                                                "clone directory.")
         CLIMessage.success_message(name + " cloned")
+
+    @staticmethod
+    def dependency_str_representation(dependency_name: str, dependency_data: OrderedDict,
+                                      colored: bool = False) -> str:
+        """
+        Returns str representation of dependency, one line, easy human readable.
+        :param dependency_name:
+        :param dependency_data: containment of "dependencies" of c3pm.json by key dependency_name
+        :param colored: if True, line is colored using color constants from
+        colored_print.ColoredPrint
+        :return: str representation
+        """
+        # Color constants
+        bold_cyan = ""
+        bold_green = ""
+        bold_yellow = ""
+        reset = ""
+        if colored:
+            bold_cyan = ColorP.BOLD_CYAN
+            bold_green = ColorP.BOLD_GREEN
+            bold_yellow = ColorP.BOLD_YELLOW
+            reset = ColorP.RESET
+
+        result = bold_green + dependency_name + bold_cyan + " -> " + bold_yellow + "type: " + \
+            dependency_data["type"] + bold_cyan
+        if dependency_data["type"] == "git-c3pm":
+            result += " , url: " + dependency_data["url"] + " , version: " + dependency_data[
+                "version"] + reset
+        return result
