@@ -139,8 +139,38 @@ imports/**
 #### list
 
 ```
-~/CLionProjects/c3pm_test_polinomial$ c3pm list
-c3pm: Listing all dependencies for project c3pm_test_polinomial
+~/CLionProjects/c3pm_test_wierdmath$ cat c3pm.json 
+{
+    "name": "c3pm_test_wierdmath",
+    "author": "Oleh Kurachenko",
+    "version": "0.0.1",
+    "description": "Test repository of type \"git-c3pm\" for c3pm project",
+    "url": "https://github.com/c3pm/c3pm_test_wierdmath.git",
+    "email": "oleh.kurachenko@gmail.com",
+    "dependencies": {
+        "c3pm_test_polynomial2": {
+            "type": "git-c3pm",
+            "url": "https://github.com/c3pm/c3pm_test_polynomial2.git",
+            "version": "master"
+        },
+        "c3pm_test_libmath": {
+            "type": "git-c3pm",
+            "url": "https://github.com/c3pm/c3pm_test_libmath.git",
+            "version": "master"
+        }
+    },
+    "c3pm_version": "v0.2",
+    "whatIsC3pm": "https://github.com/c3pm/c3pm"
+}~/CLionProjects/c3pm_test_wierdmath$ c3pm list
+c3pm: Listing all dependencies for project c3pm_test_wierdmath
+c3pm: cloning ~root~project~->c3pm_test_polynomial2 (https://github.com/c3pm/c3pm_test_polynomial2.git) to c3pm_test_polynomial2
+Cloning into 'c3pm_test_polynomial2'...
+remote: Counting objects: 23, done.
+remote: Compressing objects: 100% (15/15), done.
+remote: Total 23 (delta 3), reused 20 (delta 3), pack-reused 0
+Unpacking objects: 100% (23/23), done.
+Checking connectivity... done.
+c3pm: ~root~project~->c3pm_test_polynomial2 cloned
 c3pm: cloning ~root~project~->c3pm_test_libmath (https://github.com/c3pm/c3pm_test_libmath.git) to c3pm_test_libmath
 Cloning into 'c3pm_test_libmath'...
 remote: Counting objects: 19, done.
@@ -149,8 +179,18 @@ remote: Total 19 (delta 2), reused 16 (delta 2), pack-reused 0
 Unpacking objects: 100% (19/19), done.
 Checking connectivity... done.
 c3pm: ~root~project~->c3pm_test_libmath cloned
-Dependencies for c3pm_test_polinomial:
-├─── c3pm_test_libmath-> type: git-c3pm, url: https://github.com/c3pm/c3pm_test_libmath.git, version: master
+c3pm: cloning ~root~project~->c3pm_test_polynomial2->c3pm_test_polinomial (https://github.com/c3pm/c3pm_test_polinomial.git) to c3pm_test_polinomial
+Cloning into 'c3pm_test_polinomial'...
+remote: Counting objects: 22, done.
+remote: Compressing objects: 100% (14/14), done.
+remote: Total 22 (delta 4), reused 19 (delta 4), pack-reused 0
+Unpacking objects: 100% (22/22), done.
+Checking connectivity... done.
+c3pm: ~root~project~->c3pm_test_polynomial2->c3pm_test_polinomial cloned
+Dependencies for c3pm_test_wierdmath:
+├─── c3pm_test_polynomial2 -> type: git-c3pm , url: https://github.com/c3pm/c3pm_test_polynomial2.git , version: master
+├─── c3pm_test_libmath -> type: git-c3pm , url: https://github.com/c3pm/c3pm_test_libmath.git , version: master
+├─── c3pm_test_polinomial -> type: git-c3pm , url: https://github.com/c3pm/c3pm_test_polinomial.git , version: master
 ```
 
 #### add
@@ -234,6 +274,90 @@ c3pm: dependency c3pm_test_libmath(version master successfully removed
     "c3pm_version": "v0.2",
     "whatIsC3pm": "https://github.com/c3pm/c3pm"
 }
+```
+
+#### update
+
+```
+~/CLionProjects/c3pm_test_wierdmath$ tree
+.
+├── c3pm.json
+├── README.md
+└── src
+    └── exports
+        └── readme.txt
+
+2 directories, 3 files
+~/CLionProjects/c3pm_test_wierdmath$ c3pm update
+c3pm: Listing all dependencies for project c3pm_test_wierdmath
+c3pm: cloning ~root~project~->c3pm_test_polynomial2 (https://github.com/c3pm/c3pm_test_polynomial2.git) to c3pm_test_polynomial2
+Cloning into 'c3pm_test_polynomial2'...
+remote: Counting objects: 23, done.
+remote: Compressing objects: 100% (15/15), done.
+remote: Total 23 (delta 3), reused 20 (delta 3), pack-reused 0
+Unpacking objects: 100% (23/23), done.
+Checking connectivity... done.
+c3pm: ~root~project~->c3pm_test_polynomial2 cloned
+c3pm: cloning ~root~project~->c3pm_test_libmath (https://github.com/c3pm/c3pm_test_libmath.git) to c3pm_test_libmath
+Cloning into 'c3pm_test_libmath'...
+remote: Counting objects: 19, done.
+remote: Compressing objects: 100% (13/13), done.
+remote: Total 19 (delta 2), reused 16 (delta 2), pack-reused 0
+Unpacking objects: 100% (19/19), done.
+Checking connectivity... done.
+c3pm: ~root~project~->c3pm_test_libmath cloned
+c3pm: cloning ~root~project~->c3pm_test_polynomial2->c3pm_test_polinomial (https://github.com/c3pm/c3pm_test_polinomial.git) to c3pm_test_polinomial
+Cloning into 'c3pm_test_polinomial'...
+remote: Counting objects: 22, done.
+remote: Compressing objects: 100% (14/14), done.
+remote: Total 22 (delta 4), reused 19 (delta 4), pack-reused 0
+Unpacking objects: 100% (22/22), done.
+Checking connectivity... done.
+c3pm: ~root~project~->c3pm_test_polynomial2->c3pm_test_polinomial cloned
+c3pm: cloning c3pm_test_polynomial2 (https://github.com/c3pm/c3pm_test_polynomial2.git) to c3pm_test_polynomial2
+Cloning into 'c3pm_test_polynomial2'...
+remote: Counting objects: 23, done.
+remote: Compressing objects: 100% (15/15), done.
+remote: Total 23 (delta 3), reused 20 (delta 3), pack-reused 0
+Unpacking objects: 100% (23/23), done.
+Checking connectivity... done.
+c3pm: c3pm_test_polynomial2 cloned
+c3pm: cloning c3pm_test_libmath (https://github.com/c3pm/c3pm_test_libmath.git) to c3pm_test_libmath
+Cloning into 'c3pm_test_libmath'...
+remote: Counting objects: 19, done.
+remote: Compressing objects: 100% (13/13), done.
+remote: Total 19 (delta 2), reused 16 (delta 2), pack-reused 0
+Unpacking objects: 100% (19/19), done.
+Checking connectivity... done.
+c3pm: c3pm_test_libmath cloned
+c3pm: cloning c3pm_test_polinomial (https://github.com/c3pm/c3pm_test_polinomial.git) to c3pm_test_polinomial
+Cloning into 'c3pm_test_polinomial'...
+remote: Counting objects: 22, done.
+remote: Compressing objects: 100% (14/14), done.
+remote: Total 22 (delta 4), reused 19 (delta 4), pack-reused 0
+Unpacking objects: 100% (22/22), done.
+Checking connectivity... done.
+c3pm: c3pm_test_polinomial cloned
+c3pm: project successfully updated
+~/CLionProjects/c3pm_test_wierdmath$ tree
+.
+├── c3pm.json
+├── imports
+│   ├── c3pm_test_libmath
+│   │   ├── libmath.cpp
+│   │   └── libmath.h
+│   ├── c3pm_test_polinomial
+│   │   ├── polinomial.cpp
+│   │   └── polinomial.h
+│   └── c3pm_test_polynomial2
+│       ├── polynomial2.cpp
+│       └── polynomial2.h
+├── README.md
+└── src
+    └── exports
+        └── readme.txt
+
+6 directories, 9 files
 ```
 
 [c3pm_json]: c3pm%20json.md
